@@ -1,0 +1,97 @@
+<!-- 
+	OSC Note:
+		The following SOAP Template is for listing your ETickets from WSC.
+		To protect the donor's information, the actual statements inside the SOAP has been censored.
+-->
+
+<!-- Request -->
+POST /ecs/services/ECommerceSOAP HTTP/1.1
+Host: ecs.shop.wii.com
+User-Agent: RVL ECSHOP 4.8.0 Jul 27 2012 16:52:03
+Connection: Keep-Alive
+Accept: application/xml
+Accept-Charset: UTF-8
+Content-type: text/xml; charset=utf-8
+SOAPAction: urn:ecs.wsapi.broadon.com/ListETickets
+Content-Length: 922
+
+<?xml version="1.0" encoding="UTF-8"?>
+<SOAP-ENV:Envelope xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/"
+                   xmlns:SOAP-ENC="http://schemas.xmlsoap.org/soap/encoding/"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+                   xmlns:ecs="urn:ecs.wsapi.broadon.com">
+<SOAP-ENV:Body>
+<ecs:ListETickets xsi:type="ecs:ListETicketsRequestType">
+  <ecs:Version>2.0</ecs:Version>
+  <ecs:MessageId>ECSHOP-$DeviceId-$MessageId</ecs:MessageId>
+  <ecs:DeviceId>$DeviceId</ecs:DeviceId>
+  <ecs:DeviceToken>$DeviceToken</ecs:DeviceToken>
+  <ecs:AccountId>$AccountId</ecs:AccountId>
+  <ecs:Region>$Region</ecs:Region>
+  <ecs:Country>$Country</ecs:Country>
+  <ecs:Language>$Language</ecs:Language>
+  <ecs:SerialNo>$SerialNo</ecs:SerialNo>
+</ecs:ListETickets>
+</SOAP-ENV:Body>
+</SOAP-ENV:Envelope>
+
+<!-- Response -->
+HTTP/1.1 200 OK
+Date: Sun, 08 Jul 2018 12:04:22 GMT
+Server: Apache/2.2.19
+Keep-Alive: timeout=15, max=300
+Connection: Keep-Alive
+Transfer-Encoding: chunked
+Content-Type: text/xml;charset=utf-8
+
+a37
+<?xml version="1.0" encoding="utf-8"?>
+<soapenv:Envelope   xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" 
+					xmlns:xsd="http://www.w3.org/2001/XMLSchema" 
+					xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+<soapenv:Body>
+<ListETicketsResponse xmlns="urn:ecs.wsapi.broadon.com">
+	<Version>2.0</Version>
+	<DeviceId>$DeviceId</DeviceId>
+	<MessageId>ECSHOP-$DeviceId-$MessageId</MessageId>
+	<TimeStamp>$TimeStamp</TimeStamp>
+	<ErrorCode>0</ErrorCode>
+	<ServiceStandbyMode>false</ServiceStandbyMode>
+	<!-- 
+		OSC Note: 
+			<Tickets></Tickets> exists to state that an account owns a WSC Channel Ticket.
+			The <Tickets> section is copied as many times as the amount of channels that the account owns.
+			If the account owns 5 channels, the <Tickets></Tickets> will be listed five times.
+			To convey a proper example, this SOAP Template states that this example account owns THREE  -->
+	<Tickets>
+		<TicketId>$TicketId</TicketId>
+		<TitleId>$TitleId</TitleId>
+		<RevokeDate>0</RevokeDate>
+		<Version>0</Version>
+		<MigrateCount>0</MigrateCount>
+		<MigrateLimit>0</MigrateLimit>
+	</Tickets>
+	<Tickets>
+		<TicketId>$TicketId</TicketId>
+		<TitleId>$TitleId</TitleId>
+		<RevokeDate>0</RevokeDate>
+		<Version>0</Version>
+		<MigrateCount>0</MigrateCount>
+		<MigrateLimit>0</MigrateLimit>
+	</Tickets>
+	<Tickets>
+		<TicketId>$TicketId</TicketId>
+		<TitleId>$TitleId</TitleId>
+		<RevokeDate>0</RevokeDate>
+		<Version>0</Version>
+		<MigrateCount>0</MigrateCount>
+		<MigrateLimit>0</MigrateLimit>
+	</Tickets>
+	<ForceSyncTime>0</ForceSyncTime>
+	<ExtTicketTime>0</ExtTicketTime>
+	<SyncTime>$SyncTime</SyncTime>
+</ListETicketsResponse>
+</soapenv:Body>
+</soapenv:Envelope>
+0

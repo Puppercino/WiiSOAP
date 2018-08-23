@@ -1,0 +1,75 @@
+<!--
+	OSC Note:
+	This is the SOAP template for getting registration information.
+	For security reasons, the information inside the statements have been censored with variable like statements.
+	-->
+	
+<!-- Request -->
+POST /ias/services/IdentityAuthenticationSOAP HTTP/1.1
+Host: ias.shop.wii.com
+User-Agent: RVL ECSHOP 4.8.0 Jul 27 2012 16:52:03
+Connection: Keep-Alive
+Accept: application/xml
+Accept-Charset: UTF-8
+Content-type: text/xml; charset=utf-8
+SOAPAction: urn:ias.wsapi.broadon.com/GetRegistrationInfo
+Content-Length: 2140
+
+<?xml version="1.0" encoding="UTF-8"?>
+<SOAP-ENV:Envelope xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/"
+                   xmlns:SOAP-ENC="http://schemas.xmlsoap.org/soap/encoding/"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+                   xmlns:ias="urn:ias.wsapi.broadon.com">
+<SOAP-ENV:Body>
+<ias:GetRegistrationInfo xsi:type="ias:GetRegistrationInfoRequestType">
+  <ias:Version>2.0</ias:Version>
+  <ias:MessageId>ECSHOP-$DeviceId-$MessageId</ias:MessageId>
+  <ias:DeviceId>$DeviceId</ias:DeviceId>
+  <ias:DeviceToken>$DeviceToken</ias:DeviceToken>
+  <ias:AccountId>$AccountId</ias:AccountId>
+  <ias:Region>$Region</ias:Region>
+  <ias:Country>$Country</ias:Country>
+  <ias:Language>$Language</ias:Language>
+  <ias:DeviceCert>$DeviceCert</ias:DeviceCert>
+  <ias:Signature>$Signature</ias:Signature>
+  <ias:CertChain>$CertChain</ias:CertChain>
+  <ias:Challenge>$Challenge</ias:Challenge>
+</ias:GetRegistrationInfo>
+</SOAP-ENV:Body>
+</SOAP-ENV:Envelope>
+
+<!-- Response -->
+HTTP/1.1 200 OK
+Date: Sat, 14 Jul 2018 12:23:01 GMT
+Server: Apache/2.2.19
+Keep-Alive: timeout=15, max=300
+Connection: Keep-Alive
+Transfer-Encoding: chunked
+Content-Type: text/xml;charset=utf-8
+
+34d
+<?xml version="1.0" encoding="utf-8"?>
+<soapenv:Envelope   xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" 
+					xmlns:xsd="http://www.w3.org/2001/XMLSchema" 
+					xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+<soapenv:Body>
+<GetRegistrationInfoResponse xmlns="urn:ias.wsapi.broadon.com">
+	<Version>2.0</Version>
+	<DeviceId>$DeviceId</DeviceId>
+	<MessageId>ECSHOP-$DeviceId-$MessageId</MessageId>
+	<TimeStamp>$TimeStamp</TimeStamp>
+	<ErrorCode>0</ErrorCode>
+	<ServiceStandbyMode>false</ServiceStandbyMode>
+	<AccountId>$AccountId</AccountId>
+	<DeviceToken>$DeviceToken</DeviceToken>
+	<DeviceTokenExpired>false</DeviceTokenExpired>
+	<Country>AU</Country>
+	<ExtAccountId></ExtAccountId>
+	<DeviceCode>0000000000000000</DeviceCode>
+	<DeviceStatus>R</DeviceStatus>
+	<Currency>POINTS</Currency>
+</GetRegistrationInfoResponse>
+</soapenv:Body>
+</soapenv:Envelope>
+0

@@ -1,0 +1,49 @@
+<!--
+OSC Note:
+	This is an IAS SOAP Template for registering a Wii Shop Account.
+	The actual contents between each XML Statement have been censored for security reasons.
+-->
+
+<!-- Request -->
+POST /ias/services/IdentityAuthenticationSOAP HTTP/1.1
+Host: ias.shop.wii.com
+User-Agent: RVL ECSHOP 4.8.0 Jul 27 2012 16:52:03
+Connection: Keep-Alive
+Accept: application/xml
+Accept-Charset: UTF-8
+Content-type: text/xml; charset=utf-8
+SOAPAction: urn:ias.wsapi.broadon.com/Register
+Content-Length: 2360
+
+<?xml version="1.0" encoding="UTF-8"?>
+<SOAP-ENV:Envelope xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/"
+                   xmlns:SOAP-ENC="http://schemas.xmlsoap.org/soap/encoding/"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+                   xmlns:ias="urn:ias.wsapi.broadon.com">
+<SOAP-ENV:Body>
+<ias:Register xsi:type="ias:RegisterRequestType">
+  <ias:Version>2.0</ias:Version>
+  <ias:MessageId>$MsgId</ias:MessageId>
+  <ias:DeviceId>$DevId</ias:DeviceId>
+  <ias:DeviceToken>$DevToken</ias:DeviceToken>
+  <ias:AccountId>$AccId</ias:AccountId>
+  <ias:Region>$Reg</ias:Region>
+  <ias:Country>$Country</ias:Country>
+  <ias:Language>$Language</ias:Language>
+  <ias:DeviceCert>$DevCert</ias:DeviceCert>
+  <ias:SerialNumber>$SerNo</ias:SerialNumber>
+  <ias:RegisterRegion>$RegisReg</ias:RegisterRegion>
+  <ias:Signature>$Sign</ias:Signature>
+  <ias:CertChain>$CertChain</ias:CertChain>
+  <ias:Challenge>$Challenge</ias:Challenge>
+  <ias:WifiMac>$WifiMac</ias:WifiMac>
+  <ias:BluetoothMac>$BTMac</ias:BluetoothMac>
+  <ias:DeviceCode>$DevCode</ias:DeviceCode>
+</ias:Register>
+</SOAP-ENV:Body>
+</SOAP-ENV:Envelope>
+
+
+
+<!-- Response -->

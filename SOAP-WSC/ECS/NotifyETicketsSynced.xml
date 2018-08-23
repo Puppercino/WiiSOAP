@@ -1,0 +1,68 @@
+<!--
+	OSC Note:
+		This SOAP template is for NotifyETicketsSynced.
+		Sensitive information such as the account holder's data was censored.
+-->
+
+<!-- Request -->
+POST /ecs/services/ECommerceSOAP HTTP/1.1
+Host: ecs.shop.wii.com
+User-Agent: RVL ECSHOP 4.8.0 Jul 27 2012 16:52:03
+Connection: Keep-Alive
+Accept: application/xml
+Accept-Charset: UTF-8
+Content-type: text/xml; charset=utf-8
+SOAPAction: urn:ecs.wsapi.broadon.com/NotifyETicketsSynced
+Content-Length: 1089
+
+<?xml version="1.0" encoding="UTF-8"?>
+<SOAP-ENV:Envelope xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/"
+                   xmlns:SOAP-ENC="http://schemas.xmlsoap.org/soap/encoding/"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+                   xmlns:ecs="urn:ecs.wsapi.broadon.com">
+<SOAP-ENV:Body>
+<ecs:NotifyETicketsSynced xsi:type="ecs:NotifyETicketsSyncedRequestType">
+  <ecs:Version>2.0</ecs:Version>
+  <ecs:MessageId>ECSHOP-$DeviceId-$MessageId</ecs:MessageId>
+  <ecs:DeviceId>$DeviceId</ecs:DeviceId>
+  <ecs:DeviceToken>$DeviceToken</ecs:DeviceToken>
+  <ecs:AccountId>$AccountId</ecs:AccountId>
+  <ecs:Region>$Region</ecs:Region>
+  <ecs:Country>$Country</ecs:Country>
+  <ecs:Language>$Language</ecs:Language>
+  <ecs:SerialNo>$SerialNo</ecs:SerialNo>
+  <ecs:ForceSyncTime>0</ecs:ForceSyncTime>
+  <ecs:ExtTicketTime>$ExtTicketTime</ecs:ExtTicketTime>
+  <ecs:SyncTime>$SyncTime</ecs:SyncTime>
+</ecs:NotifyETicketsSynced>
+</SOAP-ENV:Body>
+</SOAP-ENV:Envelope>
+
+<!-- Response -->
+
+HTTP/1.1 200 OK
+Date: Sat, 14 Jul 2018 12:23:12 GMT
+Server: Apache/2.2.19
+Keep-Alive: timeout=15, max=300
+Connection: Keep-Alive
+Transfer-Encoding: chunked
+Content-Type: text/xml;charset=utf-8
+
+23d
+<?xml version="1.0" encoding="utf-8"?>
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" 
+				  xmlns:xsd="http://www.w3.org/2001/XMLSchema" 
+				  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+<soapenv:Body>
+<NotifyETicketsSyncedResponse xmlns="urn:ecs.wsapi.broadon.com">
+	<Version>2.0</Version>
+	<DeviceId>$DeviceId</DeviceId>
+	<MessageId>ECSHOP-$DeviceId-$MessageId</MessageId>
+	<TimeStamp>$TimeStamp</TimeStamp>
+	<ErrorCode>0</ErrorCode>
+	<ServiceStandbyMode>false</ServiceStandbyMode>
+</NotifyETicketsSyncedResponse>
+</soapenv:Body>
+</soapenv:Envelope>
+0

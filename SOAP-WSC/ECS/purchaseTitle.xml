@@ -1,0 +1,97 @@
+<!-- 
+	OSC Note:
+		The following SOAP Template is for purchasing a title of WSC.
+		To protect the donor's information, the actual statements inside the SOAP has been censored.
+-->
+
+<!-- Request -->
+POST /ecs/services/ECommerceSOAP HTTP/1.1
+Host: ecs.shop.wii.com
+User-Agent: RVL ECSHOP 4.8.0 Jul 27 2012 16:52:03
+Connection: Keep-Alive
+Accept: application/xml
+Accept-Charset: UTF-8
+Content-type: text/xml; charset=utf-8
+SOAPAction: urn:ecs.wsapi.broadon.com/PurchaseTitle
+Content-Length: 2030
+
+<?xml version="1.0" encoding="UTF-8"?>
+<SOAP-ENV:Envelope xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/"
+                   xmlns:SOAP-ENC="http://schemas.xmlsoap.org/soap/encoding/"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+                   xmlns:ecs="urn:ecs.wsapi.broadon.com">
+<SOAP-ENV:Body>
+<ecs:PurchaseTitle xsi:type="ecs:PurchaseTitleRequestType">
+  <ecs:Version>2.0</ecs:Version>
+  <ecs:MessageId>ECSHOP-$DeviceId-$MessageId</ecs:MessageId>
+  <ecs:DeviceId>$DeviceId</ecs:DeviceId>
+  <ecs:DeviceToken>$DeviceToken</ecs:DeviceToken>
+  <ecs:AccountId>$AccountId</ecs:AccountId>
+  <ecs:Region>$Region</ecs:Region>
+  <ecs:Country>$Country</ecs:Country>
+  <ecs:Language>$Language</ecs:Language>
+  <ecs:SerialNo>$SerialNo</ecs:SerialNo>
+  <ecs:ItemId>$ItemId</ecs:ItemId>
+  <ecs:Price>
+    <ecs:Amount>$Amount</ecs:Amount>
+    <ecs:Currency>POINTS</ecs:Currency>
+  </ecs:Price>
+  <ecs:Discount>0</ecs:Discount>
+  <ecs:Payment>
+    <ecs:PaymentMethod>ACCOUNT</ecs:PaymentMethod>
+    <ecs:AccountPayment>
+      <ecs:AccountNumber>$AccountNumber</ecs:AccountNumber>
+      <ecs:DeviceToken>$DeviceToken</ecs:DeviceToken>
+    </ecs:AccountPayment>
+  </ecs:Payment>
+  <ecs:DeviceCert>$DeviceCert</ecs:DeviceCert>
+  <ecs:TitleId>$TitleId</ecs:TitleId>
+  <ecs:Limits>
+    <ecs:Limits>0</ecs:Limits>
+    <ecs:LimitKind>$LimitKind</ecs:LimitKind>
+  </ecs:Limits>
+</ecs:PurchaseTitle>
+</SOAP-ENV:Body>
+</SOAP-ENV:Envelope>
+
+<!-- Response -->
+HTTP/1.1 200 OK
+Date: Mon, 09 Jul 2018 07:43:59 GMT
+Server: Apache/2.2.19
+Keep-Alive: timeout=15, max=300
+Connection: Keep-Alive
+Transfer-Encoding: chunked
+Content-Type: text/xml;charset=utf-8
+
+1040
+<?xml version="1.0" encoding="utf-8"?>
+<soapenv:Envelope	xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" 
+					xmlns:xsd="http://www.w3.org/2001/XMLSchema" 
+					xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+<soapenv:Body>
+<PurchaseTitleResponse xmlns="urn:ecs.wsapi.broadon.com">
+	<Version>2.0</Version>
+	<DeviceId>$DeviceId</DeviceId>
+	<MessageId>ECSHOP-$DeviceId-$MessageId</MessageId>
+	<TimeStamp>$TimeStamp</TimeStamp>
+	<ErrorCode>0</ErrorCode>
+	<ServiceStandbyMode>false</ServiceStandbyMode>
+	<Balance>
+		<Amount>$Amount</Amount>
+		<Currency>POINTS</Currency>
+	</Balance>
+	<Transactions>
+		<TransactionId>$TransactionId</TransactionId>
+		<Date>$Date</Date>
+		<Type>PURCHGAME</Type>
+	</Transactions>
+	<SyncTime>$Date</SyncTime>
+	<ETickets>$ETickets</ETickets>
+	<Certs>$Certs</Certs>
+	<Certs>$Certs</Certs>
+	<TitleId>$TitleId</TitleId>
+</PurchaseTitleResponse>
+</soapenv:Body>
+</soapenv:Envelope>
+0
