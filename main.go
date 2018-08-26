@@ -4,34 +4,44 @@ import (
 	"encoding/xml"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"net/http"
 )
 
 // The Check struct(ure) will attempt to retrieve all the namespace data.
 // Assuming that namespaces that don't exist are given a "nil", the first result that  isn't a "nil" will be used as the template response.
+const (
+	// Header is a generic XML header suitable for use with the output of Marshal.
+	// This is not automatically added to any output of this package,
+	// it is provided as a convenience.
+	Header = `<?xml version="1.0" encoding="UTF-8"?>` + "\n"
+)
 
 type Check struct {
+
+	// SOAP envelope doesn't matter to OSC. We'll only need the BODY.
+	SOAP xml.Name `xml:"SOAP-ENV:Body"`
+
 	// ECommerce Namespaces
-	CDS  string `ecs:"CheckDeviceStatus"`
-	LET  string `ecs:"ListETickets"`
-	NETS string `ecs:"NotifyETicketsSynced"`
-	PT   string `ecs:"PurchaseTitle"`
+	CDS  string `xml:"CheckDeviceStatus>Version"`
+	LET  string `xml:"ListETickets>Version"`
+	NETS string `xml:"NotifyETicketsSynced>Version"`
+	PT   string `xml:"PurchaseTitle>Version"`
 
 	// Identity Authentication Namespaces
-	CR  string `ecs:"CheckRegistration"`
-	GRI string `ecs:"GetRegistrationInfo"`
-	REG string `ecs:"Register"`
-	UNR string `ecs:"Unregister"`
+	CR  string `ias:"CheckRegistration>Version"`
+	GRI string `ias:"GetRegistrationInfo>Version"`
+	REG string `ias:"Register>Version"`
+	UNR string `ias:"Unregister>Version"`
 }
 
 func main() {
-	file, err := ioutil.ReadFile("SOAP-WSC/ECS/checkDeviceStatus.xml")
-	// ChRes is a variable that's in the form of JSON. This organises all the data into sub-variables like ChRes.CDS.
-	// This is probably my favourite thing in GoLang to be honest.
-	if err != nil {
-		panic(err)
-		return
-	}
+	fmt.Println("Starting HTTP connection (Port 8000)...")
+	http.HandleFunc("/", handler) // each request calls handler
+	log.Fatal(http.ListenAndServe(":8000", nil))
+}
+
+func handler(w http.ResponseWriter, r *http.Request) {
 	ChRes := Check{
 		CDS:  "",
 		LET:  "",
@@ -42,13 +52,18 @@ func main() {
 		REG:  "",
 		UNR:  "",
 	}
-	err = xml.Unmarshal(file, &ChRes)
+	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
+		http.Error(w, "Error reading request body",
+			http.StatusInternalServerError)
+	}
+
+	err = xml.Unmarshal([]byte(body), &ChRes)
+	if err != nil {
+		fmt.Println(ChRes)
+		fmt.Fprint(w, "What do you think you are doing?")
 		fmt.Printf("error: %v", err)
 		return
 	}
 	fmt.Println(ChRes)
-
-	// http.ListenAndServe starts a HTTP server, which is important to take note of as we will be using this to deliver the SOAP.
-	http.ListenAndServe(":80", nil)
 }
