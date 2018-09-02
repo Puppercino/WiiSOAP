@@ -60,6 +60,7 @@ func main() {
 
 func handler(w http.ResponseWriter, r *http.Request) {
 	ChRes := Check{
+		SOAP: xml.Name{},
 		CDS:  "",
 		LET:  "",
 		NETS: "",
@@ -78,9 +79,9 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	err = xml.Unmarshal([]byte(body), &ChRes)
 	if err != nil {
 		fmt.Println(ChRes)
-		fmt.Fprint(w, "What do you think you are doing?")
+		fmt.Fprint(w, "You need to POST some SOAP from WSC if you wanna get some, honey. ;)")
 		fmt.Printf("error: %v", err)
 		return
 	}
-	fmt.Println(ChRes)
+
 }
