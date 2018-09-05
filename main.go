@@ -84,4 +84,5 @@ func handler(w http.ResponseWriter, r *http.Request) {
 		}
 		fmt.Println(body)
 	}
+	fmt.Println("End of Request.")
 }
