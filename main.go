@@ -18,6 +18,7 @@
 package main
 
 import (
+	"bytes"
 	"encoding/xml"
 	"fmt"
 	"io/ioutil"
@@ -34,22 +35,9 @@ const (
 	Header = `<?xml version="1.0" encoding="UTF-8"?>` + "\n"
 )
 
-type Check struct {
-
-	// SOAP envelope doesn't matter to OSC. We'll only need the BODY.
-	SOAP xml.Name `xml:"SOAP-ENV:Body"`
-
-	// ECommerce Namespaces
-	CDS  string `xml:"CheckDeviceStatus>Version"`
-	LET  string `xml:"ListETickets>Version"`
-	NETS string `xml:"NotifyETicketsSynced>Version"`
-	PT   string `xml:"PurchaseTitle>Version"`
-
-	// Identity Authentication Namespaces
-	CR  string `ias:"CheckRegistration>Version"`
-	GRI string `ias:"GetRegistrationInfo>Version"`
-	REG string `ias:"Register>Version"`
-	UNR string `ias:"Unregister>Version"`
+type CDS struct {
+}
+type NETS struct {
 }
 
 func main() {
@@ -59,29 +47,41 @@ func main() {
 }
 
 func handler(w http.ResponseWriter, r *http.Request) {
-	ChRes := Check{
-		SOAP: xml.Name{},
-		CDS:  "",
-		LET:  "",
-		NETS: "",
-		PT:   "",
-		CR:   "",
-		GRI:  "",
-		REG:  "",
-		UNR:  "",
-	}
+	fmt.Println("Incoming request! (Processing...)")
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		http.Error(w, "Error reading request body",
 			http.StatusInternalServerError)
 	}
 
-	err = xml.Unmarshal([]byte(body), &ChRes)
-	if err != nil {
-		fmt.Println(ChRes)
-		fmt.Fprint(w, "You need to POST some SOAP from WSC if you wanna get some, honey. ;)")
-		fmt.Printf("error: %v", err)
-		return
-	}
+	// The following block of code here is a cluster of disgust.
 
+	// CheckDeviceStatus
+	if bytes.Contains(body, []byte("CheckDeviceStatus")) {
+		fmt.Println("CDS.")
+		CDS := CDS{}
+		err = xml.Unmarshal([]byte(body), &CDS)
+		if err != nil {
+			fmt.Println("...or not. Bad or incomplete request. (End processing.)")
+			fmt.Fprint(w, "You need to POST some SOAP from WSC if you wanna get some, honey. ;)")
+			fmt.Printf("error: %v", err)
+			return
+		} else {
+
+			// NotifyETicketsSynced.
+			if bytes.Contains(body, []byte("NotifyETicketsSynced")) {
+				fmt.Println("NETS")
+				NETS := NETS{}
+				err = xml.Unmarshal([]byte(body), &NETS)
+				if err != nil {
+					fmt.Println("...or not. Bad or incomplete request. (End processing.)")
+					fmt.Fprint(w, "You need to POST some SOAP from WSC if you wanna get some, honey. ;)")
+					fmt.Printf("error: %v", err)
+					return
+				}
+			}
+
+		}
+		fmt.Println(body)
+	}
 }
