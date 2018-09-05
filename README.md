@@ -6,4 +6,4 @@ Please refrain from forking if you don't plan on contributing, tinkering or work
 It only just makes unnecessary messiness.
 
 ## What's the difference between this repo and that other SOAP repo?
-The communication templates are specifically responses only.
+This is the SOAP Server Software. The other repository only has the communication templates between a Wii and WSC's server.
