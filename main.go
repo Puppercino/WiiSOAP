@@ -26,8 +26,6 @@ import (
 	"net/http"
 )
 
-// The Check struct(ure) will attempt to retrieve all the namespace data.
-// Assuming that namespaces that don't exist are given a "nil", the first result that  isn't a "nil" will be used as the template response.
 const (
 	// Header is a generic XML header suitable for use with the output of Marshal.
 	// This is not automatically added to any output of this package,
@@ -35,7 +33,15 @@ const (
 	Header = `<?xml version="1.0" encoding="UTF-8"?>` + "\n"
 )
 
+/////////////////////
+// SOAP STRUCTURES //
+/////////////////////
+
 type CDS struct {
+	XMLName   xml.Name `xml:"Envelope"`
+	Version   string   `xml:"Body>CheckDeviceStatus>Version"`
+	DeviceId  string   `xml:"Body>CheckDeviceStatus>DeviceId"`
+	MessageId string   `xml:"Body>CheckDeviceStatus>MessageId"`
 }
 type NETS struct {
 }
@@ -66,23 +72,49 @@ func handler(w http.ResponseWriter, r *http.Request) {
 			fmt.Fprint(w, "You need to POST some SOAP from WSC if you wanna get some, honey. ;)")
 			fmt.Printf("error: %v", err)
 			return
-		} else {
-
-			// NotifyETicketsSynced.
-			if bytes.Contains(body, []byte("NotifyETicketsSynced")) {
-				fmt.Println("NETS")
-				NETS := NETS{}
-				err = xml.Unmarshal([]byte(body), &NETS)
-				if err != nil {
-					fmt.Println("...or not. Bad or incomplete request. (End processing.)")
-					fmt.Fprint(w, "You need to POST some SOAP from WSC if you wanna get some, honey. ;)")
-					fmt.Printf("error: %v", err)
-					return
-				}
-			}
-
 		}
-		fmt.Println(body)
+		fmt.Println(CDS)
+		fmt.Println("The request is valid! Responding...")
+		fmt.Fprintf(w, `
+<?xml version="1.0" encoding="utf-8"?>
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" 
+				  xmlns:xsd="http://www.w3.org/2001/XMLSchema" 
+				  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+<soapenv:Body>
+<CheckDeviceStatusResponse xmlns="urn:ecs.wsapi.broadon.com">
+	<Version>2.0</Version>
+	<DeviceId>`+CDS.DeviceId+`</DeviceId>
+	<MessageId>`+CDS.MessageId+`</MessageId>
+	<TimeStamp>00000000</TimeStamp>
+	<ErrorCode>0</ErrorCode>
+	<ServiceStandbyMode>false</ServiceStandbyMode>
+	<Balance>
+		<Amount>2018</Amount>
+		<Currency>POINTS</Currency>
+	</Balance>
+	<ForceSyncTime>0</ForceSyncTime>
+	<ExtTicketTime>00000000</ExtTicketTime>
+	<SyncTime>00000000</SyncTime>
+</CheckDeviceStatusResponse>
+</soapenv:Body>
+</soapenv:Envelope>`)
+		fmt.Println("Delivered response!")
+
+	} else {
+
+		// NotifyETicketsSynced.
+		if bytes.Contains(body, []byte("NotifyETicketsSynced")) {
+			fmt.Println("NETS")
+			NETS := NETS{}
+			err = xml.Unmarshal([]byte(body), &NETS)
+			if err != nil {
+				fmt.Println("...or not. Bad or incomplete request. (End processing.)")
+				fmt.Fprint(w, "You need to POST some SOAP from WSC if you wanna get some, honey. ;)")
+				fmt.Printf("error: %v", err)
+				return
+			}
+		}
+
 	}
 	fmt.Println("End of Request.")
 }
