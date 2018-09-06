@@ -75,6 +75,13 @@ type CR struct {
 	DeviceId string `xml:"Body>CheckRegistration>DeviceId"`
 	MessageId string `xml:"Body>CheckRegistration>MessageId"`
 }
+// GetRegistrationInfo
+type GRI struct {
+	XMLName xml.Name `xml:"Envelope"`
+	Version string `xml:"Body>GetRegistrationInfo>Version"`
+	DeviceId string `xml:"Body>GetRegistrationInfo>DeviceId"`
+	MessageId string `xml:"Body>GetRegistrationInfo>MessageId"`
+}
 
 func main() {
 	fmt.Println("Starting HTTP connection (Port 8000)...")
@@ -83,10 +90,10 @@ func main() {
 }
 
 func handler(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("Incoming request! (Processing...)")
+	fmt.Println("-=Incoming request!=-")
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
-		http.Error(w, "Error reading request body",
+		http.Error(w, "Error reading request body...",
 			http.StatusInternalServerError)
 	}
 
@@ -270,5 +277,5 @@ func handler(w http.ResponseWriter, r *http.Request) {
 		}
 
 	}
-	fmt.Println("End of Request.")
+	fmt.Println("-=End of Request.=-")
 }
