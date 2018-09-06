@@ -112,7 +112,7 @@ type UNR struct {
 func main() {
 	fmt.Println("Starting HTTP connection (Port 8000)...")
 	http.HandleFunc("/", handler) // each request calls handler
-	log.Fatal(http.ListenAndServe(":8000", nil))
+	log.Fatal(http.ListenAndServe(":80", nil))
 }
 
 func handler(w http.ResponseWriter, r *http.Request) {
