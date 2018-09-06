@@ -36,14 +36,29 @@ const (
 /////////////////////
 // SOAP STRUCTURES //
 /////////////////////
+// The structures may seem repetitive and redundant, but blame WSC's inconsistent SOAP requests.
 
+// CheckDeviceStatus
 type CDS struct {
 	XMLName   xml.Name `xml:"Envelope"`
 	Version   string   `xml:"Body>CheckDeviceStatus>Version"`
 	DeviceId  string   `xml:"Body>CheckDeviceStatus>DeviceId"`
 	MessageId string   `xml:"Body>CheckDeviceStatus>MessageId"`
 }
+
+// NotifiedETicketsSynced
 type NETS struct {
+	XMLName   xml.Name `xml:"Envelope"`
+	Version   string   `xml:"Body>NotifiedETicketsSynced>Version"`
+	DeviceId  string   `xml:"Body>NotifiedETicketsSynced>DeviceId"`
+	MessageId string   `xml:"Body>NotifiedETicketsSynced>MessageId"`
+}
+// ListETickets
+type LET struct {
+	XMLName	  xml.Name  	`xml:"Envelope"`
+	Version   string		`xml:"Body>ListETickets>Version"`
+	DeviceId  string		`xml:"Body>ListETickets>DeviceId"`
+	MessageId string		`xml:"Body>ListETickets>MessageId"`
 }
 
 func main() {
@@ -109,9 +124,93 @@ func handler(w http.ResponseWriter, r *http.Request) {
 			err = xml.Unmarshal([]byte(body), &NETS)
 			if err != nil {
 				fmt.Println("...or not. Bad or incomplete request. (End processing.)")
-				fmt.Fprint(w, "You need to POST some SOAP from WSC if you wanna get some, honey. ;)")
+				fmt.Fprint(w, "This is a disgusting request, but 20 dollars is 20 dollars. ;)")
 				fmt.Printf("error: %v", err)
 				return
+			}
+			fmt.Println(NETS)
+			fmt.Println("The request is valid! Responding...")
+			fmt.Fprintf(w, `<?xml version="1.0" encoding="utf-8"?>
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" 
+				  xmlns:xsd="http://www.w3.org/2001/XMLSchema" 
+				  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+<soapenv:Body>
+<NotifyETicketsSyncedResponse xmlns="urn:ecs.wsapi.broadon.com">
+	<Version>` + NETS.Version + `</Version>
+	<DeviceId>` + NETS.DeviceId + `</DeviceId>
+	<MessageId>` + NETS.MessageId + `</MessageId>
+	<TimeStamp>00000000</TimeStamp>
+	<ErrorCode>0</ErrorCode>
+	<ServiceStandbyMode>false</ServiceStandbyMode>
+</NotifyETicketsSyncedResponse>
+</soapenv:Body>
+</soapenv:Envelope>`)
+			fmt.Println("Delivered response!")
+
+		} else {
+
+			// ListETickets
+			if bytes.Contains(body, []byte("ListETickets")) {
+				fmt.Println("LET")
+				LET := LET{}
+				err = xml.Unmarshal([]byte(body), &LET)
+				if err != nil {
+					fmt.Println("...or not. Bad or incomplete request. (End processing.)")
+					fmt.Fprint(w, "This is a disgusting request, but 20 dollars is 20 dollars. ;)")
+					fmt.Printf("error: %v", err)
+					return
+				}
+				fmt.Println(LET)
+				fmt.Println("The request is valid! Responding...")
+				fmt.Fprintf(w, `<?xml version="1.0" encoding="utf-8"?>
+<soapenv:Envelope   xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" 
+					xmlns:xsd="http://www.w3.org/2001/XMLSchema" 
+					xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+<soapenv:Body>
+<ListETicketsResponse xmlns="urn:ecs.wsapi.broadon.com">
+	<Version>` + LET.Version + `</Version>
+	<DeviceId>` + LET.DeviceId + `</DeviceId>
+	<MessageId>` + LET.MessageId + `</MessageId>
+	<TimeStamp>00000000</TimeStamp>
+	<ErrorCode>0</ErrorCode>
+	<ServiceStandbyMode>false</ServiceStandbyMode>
+	<ForceSyncTime>0</ForceSyncTime>
+	<ExtTicketTime>0</ExtTicketTime>
+	<SyncTime>00000000</SyncTime>
+</ListETicketsResponse>
+</soapenv:Body>
+</soapenv:Envelope>`)
+				fmt.Println("Delivered response!")
+
+			} else {
+				if bytes.Contains(body, []byte("PurchaseTitle")){
+
+				} else {
+
+					// IDENTITY AUTHENTICATION SOAP
+
+					if bytes.Contains(body, []byte("CheckRegistration")){
+
+					} else {
+
+						if bytes.Contains(body, []byte("GetRegistrationInfo")){
+
+						} else {
+
+							if bytes.Contains(body, []byte("Register")){
+
+							} else {
+
+								if bytes.Contains(body, []byte("Unregister")){
+
+								} else {
+									fmt.Println("Nothing sent?")
+									fmt.Fprintf(w, "the bathtub is empty, it needs SOAP. ;)")
+								}
+							}
+						}
+					}
+				}
 			}
 		}
 
