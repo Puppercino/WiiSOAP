@@ -24,6 +24,7 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"strconv"
 	"time"
 )
 
@@ -77,6 +78,7 @@ type CR struct {
 	Version   string   `xml:"Body>CheckRegistration>Version"`
 	DeviceId  string   `xml:"Body>CheckRegistration>DeviceId"`
 	MessageId string   `xml:"Body>CheckRegistration>MessageId"`
+	SerialNo  string   `xml:"Body>CheckRegistration>SerialNumber"`
 }
 
 // GetRegistrationInfo
@@ -85,6 +87,8 @@ type GRI struct {
 	Version   string   `xml:"Body>GetRegistrationInfo>Version"`
 	DeviceId  string   `xml:"Body>GetRegistrationInfo>DeviceId"`
 	MessageId string   `xml:"Body>GetRegistrationInfo>MessageId"`
+	AccountId string   `xml:"Body>GetRegistrationInfo>AccountId"`
+	Country   string   `xml:"Body>GetRegistrationInfo>Country"`
 }
 
 // Register
@@ -102,6 +106,13 @@ func main() {
 }
 
 func handler(w http.ResponseWriter, r *http.Request) {
+
+	// Get a sexy new timestamp to use.
+	timestampnano := strconv.FormatInt(time.Now().UTC().Unix(), 10)
+	fmt.Println(timestampnano)
+	timestamp := timestampnano + "000"
+	fmt.Println(timestamp)
+
 	fmt.Println("-=Incoming request!=-")
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
@@ -131,10 +142,10 @@ func handler(w http.ResponseWriter, r *http.Request) {
 				  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 <soapenv:Body>
 <CheckDeviceStatusResponse xmlns="urn:ecs.wsapi.broadon.com">
-	<Version>2.0</Version>
+	<Version>`+CDS.Version+`</Version>
 	<DeviceId>`+CDS.DeviceId+`</DeviceId>
 	<MessageId>`+CDS.MessageId+`</MessageId>
-	<TimeStamp>00000000</TimeStamp>
+	<TimeStamp>`+timestamp+`</TimeStamp>
 	<ErrorCode>0</ErrorCode>
 	<ServiceStandbyMode>false</ServiceStandbyMode>
 	<Balance>
@@ -142,8 +153,8 @@ func handler(w http.ResponseWriter, r *http.Request) {
 		<Currency>POINTS</Currency>
 	</Balance>
 	<ForceSyncTime>0</ForceSyncTime>
-	<ExtTicketTime>00000000</ExtTicketTime>
-	<SyncTime>00000000</SyncTime>
+	<ExtTicketTime>`+timestamp+`</ExtTicketTime>
+	<SyncTime>`+timestamp+`</SyncTime>
 </CheckDeviceStatusResponse>
 </soapenv:Body>
 </soapenv:Envelope>`)
@@ -173,7 +184,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	<Version>`+NETS.Version+`</Version>
 	<DeviceId>`+NETS.DeviceId+`</DeviceId>
 	<MessageId>`+NETS.MessageId+`</MessageId>
-	<TimeStamp>00000000</TimeStamp>
+	<TimeStamp>`+timestamp+`</TimeStamp>
 	<ErrorCode>0</ErrorCode>
 	<ServiceStandbyMode>false</ServiceStandbyMode>
 </NotifyETicketsSyncedResponse>
@@ -205,12 +216,12 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	<Version>`+LET.Version+`</Version>
 	<DeviceId>`+LET.DeviceId+`</DeviceId>
 	<MessageId>`+LET.MessageId+`</MessageId>
-	<TimeStamp>00000000</TimeStamp>
+	<TimeStamp>`+timestamp+`</TimeStamp>
 	<ErrorCode>0</ErrorCode>
 	<ServiceStandbyMode>false</ServiceStandbyMode>
 	<ForceSyncTime>0</ForceSyncTime>
-	<ExtTicketTime>0</ExtTicketTime>
-	<SyncTime>00000000</SyncTime>
+	<ExtTicketTime>`+timestamp+`</ExtTicketTime>
+	<SyncTime>`+timestamp+`</SyncTime>
 </ListETicketsResponse>
 </soapenv:Body>
 </soapenv:Envelope>`)
@@ -238,7 +249,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	<Version>`+PT.Version+`</Version>
 	<DeviceId>`+PT.DeviceId+`</DeviceId>
 	<MessageId>`+PT.MessageId+`</MessageId>
-	<TimeStamp>00000000</TimeStamp>
+	<TimeStamp>`+timestamp+`</TimeStamp>
 	<ErrorCode>0</ErrorCode>
 	<ServiceStandbyMode>false</ServiceStandbyMode>
 	<Balance>
@@ -247,10 +258,10 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	</Balance>
 	<Transactions>
 		<TransactionId>00000000</TransactionId>
-		<Date>`+time.RFC3339+`</Date>
+		<Date>`+timestamp+`</Date>
 		<Type>PURCHGAME</Type>
 	</Transactions>
-	<SyncTime>00000000</SyncTime>
+	<SyncTime>`+timestamp+`</SyncTime>
 	<ETickets>00000000</ETickets>
 	<Certs>00000000</Certs>
 	<Certs>00000000</Certs>
@@ -284,11 +295,11 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	<Version>`+CR.Version+`</Version>
 	<DeviceId>`+CR.DeviceId+`</DeviceId>
 	<MessageId>`+CR.DeviceId+`</MessageId>
-	<TimeStamp>00000000</TimeStamp>
+	<TimeStamp>`+timestamp+`</TimeStamp>
 	<ErrorCode>0</ErrorCode>
 	<ServiceStandbyMode>false</ServiceStandbyMode>
-	<OriginalSerialNumber></OriginalSerialNumber>
-	<DeviceStatus>$DeviceStatus</DeviceStatus>
+	<OriginalSerialNumber>`+CR.SerialNo+`</OriginalSerialNumber>
+	<DeviceStatus>R</DeviceStatus>
 </CheckRegistrationResponse>
 </soapenv:Body>
 </soapenv:Envelope>`)
@@ -307,7 +318,29 @@ func handler(w http.ResponseWriter, r *http.Request) {
 							}
 							fmt.Println(GRI)
 							fmt.Println("The request is valid! Responding...")
-							fmt.Fprintf(w, ``)
+							fmt.Fprintf(w, `<?xml version="1.0" encoding="utf-8"?>
+<soapenv:Envelope   xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" 
+					xmlns:xsd="http://www.w3.org/2001/XMLSchema" 
+					xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+<soapenv:Body>
+<GetRegistrationInfoResponse xmlns="urn:ias.wsapi.broadon.com">
+	<Version>`+GRI.Version+`</Version>
+	<DeviceId>`+GRI.DeviceId+`</DeviceId>
+	<MessageId>`+GRI.MessageId+`</MessageId>
+	<TimeStamp>`+timestamp+`</TimeStamp>
+	<ErrorCode>0</ErrorCode>
+	<ServiceStandbyMode>false</ServiceStandbyMode>
+	<AccountId>`+GRI.AccountId+`</AccountId>
+	<DeviceToken>00000000</DeviceToken>
+	<DeviceTokenExpired>false</DeviceTokenExpired>
+	<Country>`+GRI.Country+`</Country>
+	<ExtAccountId></ExtAccountId>
+	<DeviceCode>0000000000000000</DeviceCode>
+	<DeviceStatus>R</DeviceStatus>
+	<Currency>POINTS</Currency>
+</GetRegistrationInfoResponse>
+</soapenv:Body>
+</soapenv:Envelope>`)
 
 						} else {
 
