@@ -93,10 +93,20 @@ type GRI struct {
 
 // Register
 type REG struct {
+	XMLName   xml.Name `xml:"Envelope"`
+	Version   string   `xml:"Body>Register>Version"`
+	DeviceId  string   `xml:"Body>Register>DeviceId"`
+	MessageId string   `xml:"Body>Register>MessageId"`
+	AccountId string   `xml:"Body>Register>AccountId"`
+	Country   string   `xml:"Body>Register>Country"`
 }
 
 // Unregister
 type UNR struct {
+	XMLName   xml.Name `xml:"Envelope"`
+	Version   string   `xml:"Body>Unregister>Version"`
+	DeviceId  string   `xml:"Body>Unregister>DeviceId"`
+	MessageId string   `xml:"Body>Unregister>MessageId"`
 }
 
 func main() {
@@ -356,7 +366,26 @@ func handler(w http.ResponseWriter, r *http.Request) {
 								}
 								fmt.Println(REG)
 								fmt.Println("The request is valid! Responding...")
-								fmt.Fprintf(w, ``)
+								fmt.Fprintf(w, `<?xml version="1.0" encoding="utf-8"?>
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" 
+				  xmlns:xsd="http://www.w3.org/2001/XMLSchema" 
+				  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<soapenv:Body>
+		<RegisterResponse xmlns="urn:ias.wsapi.broadon.com">
+			<Version>`+REG.Version+`</Version>
+			<DeviceId>`+REG.DeviceId+`</DeviceId>
+			<MessageId>`+REG.MessageId+`</MessageId>
+			<TimeStamp>`+timestamp+`</TimeStamp>
+			<ErrorCode>0</ErrorCode>
+			<ServiceStandbyMode>false</ServiceStandbyMode>
+			<AccountId>`+REG.AccountId+`</AccountId>
+			<DeviceToken>00000000</DeviceToken>
+			<Country>`+REG.Country+`</Country>
+			<ExtAccountId></ExtAccountId>
+			<DeviceCode>00000000</DeviceCode>
+		</RegisterResponse>
+	</soapenv:Body>
+</soapenv:Envelope>`)
 
 							} else {
 
@@ -372,7 +401,19 @@ func handler(w http.ResponseWriter, r *http.Request) {
 									}
 									fmt.Println(UNR)
 									fmt.Println("The request is valid! Responding...")
-									fmt.Fprintf(w, ``)
+									fmt.Fprintf(w, `<?xml version="1.0" encoding="utf-8"?>
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<soapenv:Body>
+		<UnregisterResponse xmlns="urn:ias.wsapi.broadon.com">
+			<Version>`+UNR.Version+`</Version>
+			<DeviceId>`+UNR.DeviceId+`</DeviceId>
+			<MessageId>`+UNR.MessageId+`</MessageId>
+			<TimeStamp>`+timestamp+`</TimeStamp>
+			<ErrorCode>0</ErrorCode>
+		<ServiceStandbyMode>false</ServiceStandbyMode>
+		</UnregisterResponse>
+	</soapenv:Body>
+</soapenv:Envelope>`)
 
 								} else {
 									fmt.Println("Nothing sent?")
