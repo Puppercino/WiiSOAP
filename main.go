@@ -275,7 +275,23 @@ func handler(w http.ResponseWriter, r *http.Request) {
 						}
 						fmt.Println(CR)
 						fmt.Println("The request is valid! Responding...")
-						fmt.Fprintf(w, ``)
+						fmt.Fprintf(w, `<?xml version="1.0" encoding="utf-8"?>
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" 
+				  xmlns:xsd="http://www.w3.org/2001/XMLSchema" 
+				  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+<soapenv:Body>
+<CheckRegistrationResponse xmlns="urn:ias.wsapi.broadon.com">
+	<Version>`+CR.Version+`</Version>
+	<DeviceId>`+CR.DeviceId+`</DeviceId>
+	<MessageId>`+CR.DeviceId+`</MessageId>
+	<TimeStamp>00000000</TimeStamp>
+	<ErrorCode>0</ErrorCode>
+	<ServiceStandbyMode>false</ServiceStandbyMode>
+	<OriginalSerialNumber></OriginalSerialNumber>
+	<DeviceStatus>$DeviceStatus</DeviceStatus>
+</CheckRegistrationResponse>
+</soapenv:Body>
+</soapenv:Envelope>`)
 
 					} else {
 
