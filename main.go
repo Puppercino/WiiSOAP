@@ -24,6 +24,7 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"time"
 )
 
 const (
@@ -59,6 +60,20 @@ type LET struct {
 	Version   string		`xml:"Body>ListETickets>Version"`
 	DeviceId  string		`xml:"Body>ListETickets>DeviceId"`
 	MessageId string		`xml:"Body>ListETickets>MessageId"`
+}
+// PurchaseTitle
+type PT struct {
+	XMLName xml.Name `xml:"Envelope"`
+	Version string `xml:"Body>PurchaseTitle>Version"`
+	DeviceId string `xml:"Body>PurchaseTitle>DeviceId"`
+	MessageId string `xml:"Body>PurchaseTitle>MessageId"`
+}
+// CheckRegistration
+type CR struct {
+	XMLName xml.Name `xml:"Envelope"`
+	Version string `xml:"Body>CheckRegistration>Version"`
+	DeviceId string `xml:"Body>CheckRegistration>DeviceId"`
+	MessageId string `xml:"Body>CheckRegistration>MessageId"`
 }
 
 func main() {
@@ -184,6 +199,46 @@ func handler(w http.ResponseWriter, r *http.Request) {
 
 			} else {
 				if bytes.Contains(body, []byte("PurchaseTitle")){
+					fmt.Println("PT")
+					PT := PT{}
+					err = xml.Unmarshal([]byte(body), &PT)
+					if err != nil {
+						fmt.Println("...or not. Bad or incomplete request. (End processing.)")
+						fmt.Fprint(w, "if you wanna fun time, its gonna cost ya extra sweetie. ;)")
+						fmt.Printf("error: %v", err)
+						return
+					}
+					fmt.Println(PT)
+					fmt.Println("The request is valid! Responding...")
+					fmt.Fprintf(w, `<?xml version="1.0" encoding="utf-8"?>
+<soapenv:Envelope	xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" 
+					xmlns:xsd="http://www.w3.org/2001/XMLSchema" 
+					xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+<soapenv:Body>
+<PurchaseTitleResponse xmlns="urn:ecs.wsapi.broadon.com">
+	<Version>` + PT.Version + `</Version>
+	<DeviceId>` + PT.DeviceId + `</DeviceId>
+	<MessageId>` + PT.MessageId + `</MessageId>
+	<TimeStamp>00000000</TimeStamp>
+	<ErrorCode>0</ErrorCode>
+	<ServiceStandbyMode>false</ServiceStandbyMode>
+	<Balance>
+		<Amount>2018</Amount>
+		<Currency>POINTS</Currency>
+	</Balance>
+	<Transactions>
+		<TransactionId>00000000</TransactionId>
+		<Date>` + time.RFC3339 + `</Date>
+		<Type>PURCHGAME</Type>
+	</Transactions>
+	<SyncTime>00000000</SyncTime>
+	<ETickets>00000000</ETickets>
+	<Certs>00000000</Certs>
+	<Certs>00000000</Certs>
+	<TitleId>00000000</TitleId>
+</PurchaseTitleResponse>
+</soapenv:Body>
+</soapenv:Envelope>`)
 
 				} else {
 
