@@ -110,7 +110,7 @@ type UNR struct {
 }
 
 func main() {
-	fmt.Println("Starting HTTP connection (Port 8000)...")
+	fmt.Println("Starting HTTP connection (Port 80)...")
 	http.HandleFunc("/", handler) // each request calls handler
 	log.Fatal(http.ListenAndServe(":80", nil))
 }
@@ -119,9 +119,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 
 	// Get a sexy new timestamp to use.
 	timestampnano := strconv.FormatInt(time.Now().UTC().Unix(), 10)
-	fmt.Println(timestampnano)
 	timestamp := timestampnano + "000"
-	fmt.Println(timestamp)
 
 	fmt.Println("-=Incoming request!=-")
 	body, err := ioutil.ReadAll(r.Body)
@@ -427,5 +425,5 @@ func handler(w http.ResponseWriter, r *http.Request) {
 		}
 
 	}
-	fmt.Println("-=End of Request.=-")
+	fmt.Println("-=End of Request.=-"+"\n")
 }
