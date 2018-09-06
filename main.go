@@ -54,33 +54,45 @@ type NETS struct {
 	DeviceId  string   `xml:"Body>NotifiedETicketsSynced>DeviceId"`
 	MessageId string   `xml:"Body>NotifiedETicketsSynced>MessageId"`
 }
+
 // ListETickets
 type LET struct {
-	XMLName	  xml.Name  	`xml:"Envelope"`
-	Version   string		`xml:"Body>ListETickets>Version"`
-	DeviceId  string		`xml:"Body>ListETickets>DeviceId"`
-	MessageId string		`xml:"Body>ListETickets>MessageId"`
+	XMLName   xml.Name `xml:"Envelope"`
+	Version   string   `xml:"Body>ListETickets>Version"`
+	DeviceId  string   `xml:"Body>ListETickets>DeviceId"`
+	MessageId string   `xml:"Body>ListETickets>MessageId"`
 }
+
 // PurchaseTitle
 type PT struct {
-	XMLName xml.Name `xml:"Envelope"`
-	Version string `xml:"Body>PurchaseTitle>Version"`
-	DeviceId string `xml:"Body>PurchaseTitle>DeviceId"`
-	MessageId string `xml:"Body>PurchaseTitle>MessageId"`
+	XMLName   xml.Name `xml:"Envelope"`
+	Version   string   `xml:"Body>PurchaseTitle>Version"`
+	DeviceId  string   `xml:"Body>PurchaseTitle>DeviceId"`
+	MessageId string   `xml:"Body>PurchaseTitle>MessageId"`
 }
+
 // CheckRegistration
 type CR struct {
-	XMLName xml.Name `xml:"Envelope"`
-	Version string `xml:"Body>CheckRegistration>Version"`
-	DeviceId string `xml:"Body>CheckRegistration>DeviceId"`
-	MessageId string `xml:"Body>CheckRegistration>MessageId"`
+	XMLName   xml.Name `xml:"Envelope"`
+	Version   string   `xml:"Body>CheckRegistration>Version"`
+	DeviceId  string   `xml:"Body>CheckRegistration>DeviceId"`
+	MessageId string   `xml:"Body>CheckRegistration>MessageId"`
 }
+
 // GetRegistrationInfo
 type GRI struct {
-	XMLName xml.Name `xml:"Envelope"`
-	Version string `xml:"Body>GetRegistrationInfo>Version"`
-	DeviceId string `xml:"Body>GetRegistrationInfo>DeviceId"`
-	MessageId string `xml:"Body>GetRegistrationInfo>MessageId"`
+	XMLName   xml.Name `xml:"Envelope"`
+	Version   string   `xml:"Body>GetRegistrationInfo>Version"`
+	DeviceId  string   `xml:"Body>GetRegistrationInfo>DeviceId"`
+	MessageId string   `xml:"Body>GetRegistrationInfo>MessageId"`
+}
+
+// Register
+type REG struct {
+}
+
+// Unregister
+type UNR struct {
 }
 
 func main() {
@@ -158,9 +170,9 @@ func handler(w http.ResponseWriter, r *http.Request) {
 				  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 <soapenv:Body>
 <NotifyETicketsSyncedResponse xmlns="urn:ecs.wsapi.broadon.com">
-	<Version>` + NETS.Version + `</Version>
-	<DeviceId>` + NETS.DeviceId + `</DeviceId>
-	<MessageId>` + NETS.MessageId + `</MessageId>
+	<Version>`+NETS.Version+`</Version>
+	<DeviceId>`+NETS.DeviceId+`</DeviceId>
+	<MessageId>`+NETS.MessageId+`</MessageId>
 	<TimeStamp>00000000</TimeStamp>
 	<ErrorCode>0</ErrorCode>
 	<ServiceStandbyMode>false</ServiceStandbyMode>
@@ -190,9 +202,9 @@ func handler(w http.ResponseWriter, r *http.Request) {
 					xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 <soapenv:Body>
 <ListETicketsResponse xmlns="urn:ecs.wsapi.broadon.com">
-	<Version>` + LET.Version + `</Version>
-	<DeviceId>` + LET.DeviceId + `</DeviceId>
-	<MessageId>` + LET.MessageId + `</MessageId>
+	<Version>`+LET.Version+`</Version>
+	<DeviceId>`+LET.DeviceId+`</DeviceId>
+	<MessageId>`+LET.MessageId+`</MessageId>
 	<TimeStamp>00000000</TimeStamp>
 	<ErrorCode>0</ErrorCode>
 	<ServiceStandbyMode>false</ServiceStandbyMode>
@@ -205,7 +217,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 				fmt.Println("Delivered response!")
 
 			} else {
-				if bytes.Contains(body, []byte("PurchaseTitle")){
+				if bytes.Contains(body, []byte("PurchaseTitle")) {
 					fmt.Println("PT")
 					PT := PT{}
 					err = xml.Unmarshal([]byte(body), &PT)
@@ -223,9 +235,9 @@ func handler(w http.ResponseWriter, r *http.Request) {
 					xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 <soapenv:Body>
 <PurchaseTitleResponse xmlns="urn:ecs.wsapi.broadon.com">
-	<Version>` + PT.Version + `</Version>
-	<DeviceId>` + PT.DeviceId + `</DeviceId>
-	<MessageId>` + PT.MessageId + `</MessageId>
+	<Version>`+PT.Version+`</Version>
+	<DeviceId>`+PT.DeviceId+`</DeviceId>
+	<MessageId>`+PT.MessageId+`</MessageId>
 	<TimeStamp>00000000</TimeStamp>
 	<ErrorCode>0</ErrorCode>
 	<ServiceStandbyMode>false</ServiceStandbyMode>
@@ -235,7 +247,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	</Balance>
 	<Transactions>
 		<TransactionId>00000000</TransactionId>
-		<Date>` + time.RFC3339 + `</Date>
+		<Date>`+time.RFC3339+`</Date>
 		<Type>PURCHGAME</Type>
 	</Transactions>
 	<SyncTime>00000000</SyncTime>
@@ -251,19 +263,67 @@ func handler(w http.ResponseWriter, r *http.Request) {
 
 					// IDENTITY AUTHENTICATION SOAP
 
-					if bytes.Contains(body, []byte("CheckRegistration")){
+					if bytes.Contains(body, []byte("CheckRegistration")) {
+						fmt.Println("CR.")
+						CR := CR{}
+						err = xml.Unmarshal([]byte(body), &CR)
+						if err != nil {
+							fmt.Println("...or not. Bad or incomplete request. (End processing.)")
+							fmt.Fprint(w, "not good enough for me. ;)")
+							fmt.Printf("error: %v", err)
+							return
+						}
+						fmt.Println(CR)
+						fmt.Println("The request is valid! Responding...")
+						fmt.Fprintf(w, ``)
 
 					} else {
 
-						if bytes.Contains(body, []byte("GetRegistrationInfo")){
+						if bytes.Contains(body, []byte("GetRegistrationInfo")) {
+							fmt.Println("GRI.")
+							GRI := GRI{}
+							err = xml.Unmarshal([]byte(body), &GRI)
+							if err != nil {
+								fmt.Println("...or not. Bad or incomplete request. (End processing.)")
+								fmt.Fprint(w, "how dirty. ;)")
+								fmt.Printf("error: %v", err)
+								return
+							}
+							fmt.Println(GRI)
+							fmt.Println("The request is valid! Responding...")
+							fmt.Fprintf(w, ``)
 
 						} else {
 
-							if bytes.Contains(body, []byte("Register")){
+							if bytes.Contains(body, []byte("Register")) {
+								fmt.Println("REG.")
+								REG := REG{}
+								err = xml.Unmarshal([]byte(body), &REG)
+								if err != nil {
+									fmt.Println("...or not. Bad or incomplete request. (End processing.)")
+									fmt.Fprint(w, "disgustingly invalid. ;)")
+									fmt.Printf("error: %v", err)
+									return
+								}
+								fmt.Println(REG)
+								fmt.Println("The request is valid! Responding...")
+								fmt.Fprintf(w, ``)
 
 							} else {
 
-								if bytes.Contains(body, []byte("Unregister")){
+								if bytes.Contains(body, []byte("Unregister")) {
+									fmt.Println("UNR.")
+									UNR := UNR{}
+									err = xml.Unmarshal([]byte(body), &UNR)
+									if err != nil {
+										fmt.Println("...or not. Bad or incomplete request. (End processing.)")
+										fmt.Fprint(w, "how abnormal... ;)")
+										fmt.Printf("error: %v", err)
+										return
+									}
+									fmt.Println(UNR)
+									fmt.Println("The request is valid! Responding...")
+									fmt.Fprintf(w, ``)
 
 								} else {
 									fmt.Println("Nothing sent?")
