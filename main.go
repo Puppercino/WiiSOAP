@@ -110,9 +110,11 @@ type UNR struct {
 }
 
 func main() {
-	fmt.Println("Starting HTTP connection (Port 80)...")
+	fmt.Println("Starting HTTP connection (Port 2018)...")
+	fmt.Println("NOTICE: The SOAP Server runs under a port that doesn't work with WSC naturally.")
+	fmt.Println("You can either use proxying from Nginx (recommended) or another web server software, or edit this script to use port 80.")
 	http.HandleFunc("/", handler) // each request calls handler
-	log.Fatal(http.ListenAndServe(":80", nil))
+	log.Fatal(http.ListenAndServe(":2018", nil))
 }
 
 func handler(w http.ResponseWriter, r *http.Request) {
