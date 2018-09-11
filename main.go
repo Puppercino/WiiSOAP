@@ -21,6 +21,9 @@ import (
 	"bytes"
 	"encoding/xml"
 	"fmt"
+	"io"
+	"os"
+    "path/filepath"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -109,12 +112,60 @@ type UNR struct {
 	MessageId string   `xml:"Body>Unregister>MessageId"`
 }
 
+// Configuration
+type ConfigStruct struct {
+	XMLName  xml.Name `xml:"setting"`
+	Key      string   `xml:"key,attr"̀`
+	Value    string   `xml:"value,attr"`
+}
+
+type ConfigSettings struct {
+    XMLName  xml.Name    `xml:"config"`
+    Value   []ConfigStruct `xml:"setting"`
+}
+
+var Port string // Port
+
+func Config(reader io.Reader) ([]ConfigStruct, error) {
+    var config ConfigSettings
+    if err := xml.NewDecoder(reader).Decode(&config); err != nil {
+        return nil, err
+    }
+    return config.Value, nil
+}
+
+func ConfigLoad() {
+	configFilePath, err := filepath.Abs("config.xml")
+	if err != nil {
+        fmt.Println(err)
+        os.Exit(1)
+    }
+    file, err := os.Open(configFilePath)
+    if err != nil {
+        fmt.Println(err)
+        os.Exit(1)
+    }
+    defer file.Close()
+    ConfigFile, err := Config(file)
+    if err != nil {
+        fmt.Println(err)
+        os.Exit(1)
+    }
+    Port = ConfigFile[0].Value
+}
+
 func main() {
-	fmt.Println("Starting HTTP connection (Port 2018)...")
-	fmt.Println("NOTICE: The SOAP Server runs under a port that doesn't work with WSC naturally.")
-	fmt.Println("You can either use proxying from Nginx (recommended) or another web server software, or edit this script to use port 80.")
+	fmt.Println("SOAP-GO-OSC v1.1")
+	fmt.Println("Loading config...")
+	ConfigLoad()
+	fmt.Println("Starting HTTP connection (Port "+Port+")...")
+	if(Port != "80") {
+		fmt.Println("NOTICE: The SOAP Server runs under a port that doesn't work with WSC naturally.")
+		fmt.Println("You can edit the config to use port 80.")
+	}
 	http.HandleFunc("/", handler) // each request calls handler
-	log.Fatal(http.ListenAndServe(":2018", nil))
+	fmt.Println("Server running.")
+	log.Fatal(http.ListenAndServe(":"+Port, nil))
 }
 
 func handler(w http.ResponseWriter, r *http.Request) {
