@@ -16,4 +16,5 @@ This the the content of the configuration file, the **config.xml**:
 	<setting key="port" value="2018" /> 
 </config>
 ```
-You can edit the port at the `value="<port>"`.
+You can edit the port at the `value="port"`.
+*Replace* ***port*** *with the port you want the server to listen on.*
