@@ -1,3 +1,4 @@
 <config>
-	<setting key="port" value="80" />
+	<!-- 2018 is the default port, 80 the standard port of the WSC. -->
+	<setting key="port" value="2018" /> 
 </config>
