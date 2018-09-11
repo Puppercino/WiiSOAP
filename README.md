@@ -7,3 +7,13 @@ It only just makes unnecessary messiness.
 
 ## What's the difference between this repo and that other SOAP repo?
 This is the SOAP Server Software. The other repository only has the communication templates between a Wii and WSC's server.
+
+## How do i configure the server?
+This the the content of the configuration file, the **config.xml**:
+```xml
+<config>
+	<!-- 2018 is the default port, 80 the standard port of the WSC. -->
+	<setting key="port" value="2018" /> 
+</config>
+```
+You can edit the port at the `value="<port>"`.
