@@ -35,80 +35,6 @@ const (
 	Header = `<?xml version="1.0" encoding="UTF-8"?>` + "\n"
 )
 
-/////////////////////
-// SOAP STRUCTURES //
-/////////////////////
-// The structures may seem repetitive and redundant, but blame WSC's inconsistent SOAP requests.
-
-// CheckDeviceStatus
-type CDS struct {
-	XMLName   xml.Name `xml:"Envelope"`
-	Version   string   `xml:"Body>CheckDeviceStatus>Version"`
-	DeviceId  string   `xml:"Body>CheckDeviceStatus>DeviceId"`
-	MessageId string   `xml:"Body>CheckDeviceStatus>MessageId"`
-}
-
-// NotifiedETicketsSynced
-type NETS struct {
-	XMLName   xml.Name `xml:"Envelope"`
-	Version   string   `xml:"Body>NotifiedETicketsSynced>Version"`
-	DeviceId  string   `xml:"Body>NotifiedETicketsSynced>DeviceId"`
-	MessageId string   `xml:"Body>NotifiedETicketsSynced>MessageId"`
-}
-
-// ListETickets
-type LET struct {
-	XMLName   xml.Name `xml:"Envelope"`
-	Version   string   `xml:"Body>ListETickets>Version"`
-	DeviceId  string   `xml:"Body>ListETickets>DeviceId"`
-	MessageId string   `xml:"Body>ListETickets>MessageId"`
-}
-
-// PurchaseTitle
-type PT struct {
-	XMLName   xml.Name `xml:"Envelope"`
-	Version   string   `xml:"Body>PurchaseTitle>Version"`
-	DeviceId  string   `xml:"Body>PurchaseTitle>DeviceId"`
-	MessageId string   `xml:"Body>PurchaseTitle>MessageId"`
-}
-
-// CheckRegistration
-type CR struct {
-	XMLName   xml.Name `xml:"Envelope"`
-	Version   string   `xml:"Body>CheckRegistration>Version"`
-	DeviceId  string   `xml:"Body>CheckRegistration>DeviceId"`
-	MessageId string   `xml:"Body>CheckRegistration>MessageId"`
-	SerialNo  string   `xml:"Body>CheckRegistration>SerialNumber"`
-}
-
-// GetRegistrationInfo
-type GRI struct {
-	XMLName   xml.Name `xml:"Envelope"`
-	Version   string   `xml:"Body>GetRegistrationInfo>Version"`
-	DeviceId  string   `xml:"Body>GetRegistrationInfo>DeviceId"`
-	MessageId string   `xml:"Body>GetRegistrationInfo>MessageId"`
-	AccountId string   `xml:"Body>GetRegistrationInfo>AccountId"`
-	Country   string   `xml:"Body>GetRegistrationInfo>Country"`
-}
-
-// Register
-type REG struct {
-	XMLName   xml.Name `xml:"Envelope"`
-	Version   string   `xml:"Body>Register>Version"`
-	DeviceId  string   `xml:"Body>Register>DeviceId"`
-	MessageId string   `xml:"Body>Register>MessageId"`
-	AccountId string   `xml:"Body>Register>AccountId"`
-	Country   string   `xml:"Body>Register>Country"`
-}
-
-// Unregister
-type UNR struct {
-	XMLName   xml.Name `xml:"Envelope"`
-	Version   string   `xml:"Body>Unregister>Version"`
-	DeviceId  string   `xml:"Body>Unregister>DeviceId"`
-	MessageId string   `xml:"Body>Unregister>MessageId"`
-}
-
 func main() {
 	fmt.Println("Starting HTTP connection (Port 2018)...")
 	fmt.Println("NOTICE: The SOAP Server runs under a port that doesn't work with WSC naturally.")
@@ -427,5 +353,5 @@ func handler(w http.ResponseWriter, r *http.Request) {
 		}
 
 	}
-	fmt.Println("-=End of Request.=-"+"\n")
+	fmt.Println("-=End of Request.=-" + "\n")
 }
