@@ -19,8 +19,10 @@ package main
 
 import (
 	"bytes"
+	"encoding/json"
 	"encoding/xml"
 	"fmt"
+	_ "github.com/go-sql-driver/mysql"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -35,7 +37,24 @@ const (
 	Header = `<?xml version="1.0" encoding="UTF-8"?>` + "\n"
 )
 
+var configs []Config
+
+// CheckError makes error handling not as ugly and inefficient.
+func CheckError(e error) {
+	if e != nil {
+		log.Fatal("There has been an error while performing this action. Reason: ", e)
+	}
+}
+
 func main() {
+	configblob, err := ioutil.ReadFile("config.json")
+	CheckError(err)
+	err = json.Unmarshal(configblob, &configs)
+	CheckError(err)
+
+	fmt.Println("Open SOAP-GO for Server Environments.")
+	fmt.Println("Initializing core...")
+
 	fmt.Println("Starting HTTP connection (Port 2018)...")
 	fmt.Println("NOTICE: The SOAP Server runs under a port that doesn't work with WSC naturally.")
 	fmt.Println("You can either use proxying from Nginx (recommended) or another web server software, or edit this script to use port 80.")

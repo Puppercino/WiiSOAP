@@ -24,6 +24,12 @@ import "encoding/xml"
 /////////////////////
 // The structures may seem repetitive and redundant, but blame WSC's inconsistent SOAP requests.
 
+type Config struct {
+	SQLUser string
+	SQLPass string
+	Port    string
+}
+
 // CheckDeviceStatus
 type CDS struct {
 	XMLName   xml.Name `xml:"Envelope"`
