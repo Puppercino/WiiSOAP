@@ -19,13 +19,13 @@ package main
 
 import (
 	"bytes"
-	"encoding/json"
 	"encoding/xml"
 	"fmt"
 	_ "github.com/go-sql-driver/mysql"
 	"io/ioutil"
 	"log"
 	"net/http"
+	"os"
 	"strconv"
 	"time"
 )
@@ -37,8 +37,6 @@ const (
 	Header = `<?xml version="1.0" encoding="UTF-8"?>` + "\n"
 )
 
-var configs []Config
-
 // CheckError makes error handling not as ugly and inefficient.
 func CheckError(e error) {
 	if e != nil {
@@ -47,12 +45,16 @@ func CheckError(e error) {
 }
 
 func main() {
-	configblob, err := ioutil.ReadFile("config.json")
-	CheckError(err)
-	err = json.Unmarshal(configblob, &configs)
-	CheckError(err)
 
 	fmt.Println("Open SOAP-GO for Server Environments.")
+	fmt.Println("Reading the Config...")
+	configfile, err := os.Open("./config.xml")
+	CheckError(err)
+	ioconfig, err := ioutil.ReadAll(configfile)
+	CheckError(err)
+	err = xml.Unmarshal(ioconfig, &Config{})
+	fmt.Println(Config{})
+	CheckError(err)
 	fmt.Println("Initializing core...")
 
 	fmt.Println("Starting HTTP connection (Port 2018)...")
