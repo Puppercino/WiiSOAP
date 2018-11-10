@@ -19,6 +19,7 @@ package main
 
 import (
 	"bytes"
+	"database/sql"
 	"encoding/xml"
 	"fmt"
 	_ "github.com/go-sql-driver/mysql"
@@ -46,23 +47,30 @@ func CheckError(e error) {
 
 func main() {
 
-	fmt.Println("WiiSOAP 0.2 Kawauso")
+	fmt.Println("WiiSOAP 0.2.1 Kawauso")
 	fmt.Println("Reading the Config...")
 	configfile, err := os.Open("./config.xml")
 	CheckError(err)
 	ioconfig, err := ioutil.ReadAll(configfile)
 	CheckError(err)
-	Config := Config{}
-	err = xml.Unmarshal([]byte(ioconfig), &Config)
-	fmt.Println(Config)
+	CON := Config{}
+	err = xml.Unmarshal([]byte(ioconfig), &CON)
+	fmt.Println(CON)
 	CheckError(err)
+
 	fmt.Println("Initializing core...")
 
-	fmt.Println("Starting HTTP connection (Port 2018)...")
+	// Start SQL.
+	db, err := sql.Open("mysql",
+		CON.SQLUser+":"+CON.SQLPass+"@tcp(127.0.0.1:3306)/hello")
+	CheckError(err)
+	defer db.Close()
+
+	fmt.Println("Starting HTTP connection (" + CON.Port + ")...")
 	fmt.Println("NOTICE: The SOAP Server runs under a port that doesn't work with WSC naturally.")
 	fmt.Println("You can either use proxying from Nginx (recommended) or another web server software, or edit this script to use port 80.")
 	http.HandleFunc("/", handler) // each request calls handler
-	log.Fatal(http.ListenAndServe(":2018", nil))
+	log.Fatal(http.ListenAndServe(CON.Port, nil))
 }
 
 func handler(w http.ResponseWriter, r *http.Request) {
