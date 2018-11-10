@@ -46,7 +46,7 @@ func CheckError(e error) {
 
 func main() {
 
-	fmt.Println("WiiSOAP Shukaku.")
+	fmt.Println("WiiSOAP 0.2 Kawauso")
 	fmt.Println("Reading the Config...")
 	configfile, err := os.Open("./config.xml")
 	CheckError(err)
