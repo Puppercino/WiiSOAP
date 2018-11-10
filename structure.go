@@ -25,7 +25,7 @@ import "encoding/xml"
 // The structures may seem repetitive and redundant, but blame WSC's inconsistent SOAP requests.
 
 type Config struct {
-	XMLName xml.Name `xml:"SOAP-GO-WSC_Config"`
+	XMLName xml.Name `xml:"Config"`
 	SQLUser string   `xml:"SQLUser"`
 	SQLPass string   `xml:"SQLPass"`
 	Port    string   `xml:"Port"`

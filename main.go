@@ -52,8 +52,9 @@ func main() {
 	CheckError(err)
 	ioconfig, err := ioutil.ReadAll(configfile)
 	CheckError(err)
-	err = xml.Unmarshal(ioconfig, &Config{})
-	fmt.Println(Config{})
+	Config := Config{}
+	err = xml.Unmarshal([]byte(ioconfig), &Config)
+	fmt.Println(Config)
 	CheckError(err)
 	fmt.Println("Initializing core...")
 
