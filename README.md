@@ -11,7 +11,7 @@ Versions on this software are based on goals. (e.g 0.2 works towards SQL support
 - Added SQL Driver.
 - SOAP-GO-OSC is now just called WiiSOAP.
 
-## 0.1
+## 0.1 (No Codename)
 ### 0.1.2
 - Optimised the software. (Structures are now in their own file.)
 ### 0.1.1
