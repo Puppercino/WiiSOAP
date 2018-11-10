@@ -1,6 +1,6 @@
 //	Copyright (C) 2018  CornierKhan1
 //
-//	SOAP-GO-OSC is Open Shop Channel's SOAP Server Software, designed specifically to handle Wii Shop Channel SOAP.
+//	WiiSOAP is Open Shop Channel's SOAP Server Software, designed specifically to handle Wii Shop Channel SOAP.
 //
 //    This program is free software: you can redistribute it and/or modify
 //    it under the terms of the GNU Affero General Public License as published
@@ -46,7 +46,7 @@ func CheckError(e error) {
 
 func main() {
 
-	fmt.Println("Open SOAP-GO for Server Environments.")
+	fmt.Println("WiiSOAP Shukaku.")
 	fmt.Println("Reading the Config...")
 	configfile, err := os.Open("./config.xml")
 	CheckError(err)
