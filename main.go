@@ -18,7 +18,6 @@
 package main
 
 import (
-	"bytes"
 	"database/sql"
 	"encoding/xml"
 	"fmt"
@@ -47,7 +46,7 @@ func CheckError(e error) {
 
 func main() {
 
-	fmt.Println("WiiSOAP 0.2.1 Kawauso")
+	fmt.Println("WiiSOAP 0.2.2 Kawauso")
 	fmt.Println("Reading the Config...")
 	configfile, err := os.Open("./config.xml")
 	CheckError(err)
@@ -86,10 +85,11 @@ func handler(w http.ResponseWriter, r *http.Request) {
 			http.StatusInternalServerError)
 	}
 
-	// The following block of code here is a cluster of disgust.
+	// The requests are in byte format, so please use []byte("") when adding a new case.
+	switch body {
+	// TODO: Make the case functions cleaner. (e.g. The should the response be a variable?)
+	case []byte("CheckDeviceStatus"):
 
-	// CheckDeviceStatus
-	if bytes.Contains(body, []byte("CheckDeviceStatus")) {
 		fmt.Println("CDS.")
 		CDS := CDS{}
 		err = xml.Unmarshal([]byte(body), &CDS)
@@ -126,22 +126,20 @@ func handler(w http.ResponseWriter, r *http.Request) {
 </soapenv:Envelope>`)
 		fmt.Println("Delivered response!")
 
-	} else {
+	case []byte("NotifiedETicketsSynced"):
 
-		// NotifyETicketsSynced.
-		if bytes.Contains(body, []byte("NotifyETicketsSynced")) {
-			fmt.Println("NETS")
-			NETS := NETS{}
-			err = xml.Unmarshal([]byte(body), &NETS)
-			if err != nil {
-				fmt.Println("...or not. Bad or incomplete request. (End processing.)")
-				fmt.Fprint(w, "This is a disgusting request, but 20 dollars is 20 dollars. ;)")
-				fmt.Printf("error: %v", err)
-				return
-			}
-			fmt.Println(NETS)
-			fmt.Println("The request is valid! Responding...")
-			fmt.Fprintf(w, `<?xml version="1.0" encoding="utf-8"?>
+		fmt.Println("NETS")
+		NETS := NETS{}
+		err = xml.Unmarshal([]byte(body), &NETS)
+		if err != nil {
+			fmt.Println("...or not. Bad or incomplete request. (End processing.)")
+			fmt.Fprint(w, "This is a disgusting request, but 20 dollars is 20 dollars. ;)")
+			fmt.Printf("error: %v", err)
+			return
+		}
+		fmt.Println(NETS)
+		fmt.Println("The request is valid! Responding...")
+		fmt.Fprintf(w, `<?xml version="1.0" encoding="utf-8"?>
 <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" 
 				  xmlns:xsd="http://www.w3.org/2001/XMLSchema" 
 				  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
@@ -156,24 +154,22 @@ func handler(w http.ResponseWriter, r *http.Request) {
 </NotifyETicketsSyncedResponse>
 </soapenv:Body>
 </soapenv:Envelope>`)
-			fmt.Println("Delivered response!")
+		fmt.Println("Delivered response!")
 
-		} else {
+	case []byte("ListETickets"):
 
-			// ListETickets
-			if bytes.Contains(body, []byte("ListETickets")) {
-				fmt.Println("LET")
-				LET := LET{}
-				err = xml.Unmarshal([]byte(body), &LET)
-				if err != nil {
-					fmt.Println("...or not. Bad or incomplete request. (End processing.)")
-					fmt.Fprint(w, "This is a disgusting request, but 20 dollars is 20 dollars. ;)")
-					fmt.Printf("error: %v", err)
-					return
-				}
-				fmt.Println(LET)
-				fmt.Println("The request is valid! Responding...")
-				fmt.Fprintf(w, `<?xml version="1.0" encoding="utf-8"?>
+		fmt.Println("LET")
+		LET := LET{}
+		err = xml.Unmarshal([]byte(body), &LET)
+		if err != nil {
+			fmt.Println("...or not. Bad or incomplete request. (End processing.)")
+			fmt.Fprint(w, "This is a disgusting request, but 20 dollars is 20 dollars. ;)")
+			fmt.Printf("error: %v", err)
+			return
+		}
+		fmt.Println(LET)
+		fmt.Println("The request is valid! Responding...")
+		fmt.Fprintf(w, `<?xml version="1.0" encoding="utf-8"?>
 <soapenv:Envelope   xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" 
 					xmlns:xsd="http://www.w3.org/2001/XMLSchema" 
 					xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
@@ -191,22 +187,22 @@ func handler(w http.ResponseWriter, r *http.Request) {
 </ListETicketsResponse>
 </soapenv:Body>
 </soapenv:Envelope>`)
-				fmt.Println("Delivered response!")
+		fmt.Println("Delivered response!")
 
-			} else {
-				if bytes.Contains(body, []byte("PurchaseTitle")) {
-					fmt.Println("PT")
-					PT := PT{}
-					err = xml.Unmarshal([]byte(body), &PT)
-					if err != nil {
-						fmt.Println("...or not. Bad or incomplete request. (End processing.)")
-						fmt.Fprint(w, "if you wanna fun time, its gonna cost ya extra sweetie. ;)")
-						fmt.Printf("error: %v", err)
-						return
-					}
-					fmt.Println(PT)
-					fmt.Println("The request is valid! Responding...")
-					fmt.Fprintf(w, `<?xml version="1.0" encoding="utf-8"?>
+	case []byte("PurchaseTitle"):
+
+		fmt.Println("PT")
+		PT := PT{}
+		err = xml.Unmarshal([]byte(body), &PT)
+		if err != nil {
+			fmt.Println("...or not. Bad or incomplete request. (End processing.)")
+			fmt.Fprint(w, "if you wanna fun time, its gonna cost ya extra sweetie. ;)")
+			fmt.Printf("error: %v", err)
+			return
+		}
+		fmt.Println(PT)
+		fmt.Println("The request is valid! Responding...")
+		fmt.Fprintf(w, `<?xml version="1.0" encoding="utf-8"?>
 <soapenv:Envelope	xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" 
 					xmlns:xsd="http://www.w3.org/2001/XMLSchema" 
 					xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
@@ -235,24 +231,22 @@ func handler(w http.ResponseWriter, r *http.Request) {
 </PurchaseTitleResponse>
 </soapenv:Body>
 </soapenv:Envelope>`)
+		fmt.Println("Delivered response!")
 
-				} else {
+	case []byte("CheckRegistration"):
 
-					// IDENTITY AUTHENTICATION SOAP
-
-					if bytes.Contains(body, []byte("CheckRegistration")) {
-						fmt.Println("CR.")
-						CR := CR{}
-						err = xml.Unmarshal([]byte(body), &CR)
-						if err != nil {
-							fmt.Println("...or not. Bad or incomplete request. (End processing.)")
-							fmt.Fprint(w, "not good enough for me. ;)")
-							fmt.Printf("error: %v", err)
-							return
-						}
-						fmt.Println(CR)
-						fmt.Println("The request is valid! Responding...")
-						fmt.Fprintf(w, `<?xml version="1.0" encoding="utf-8"?>
+		fmt.Println("CR.")
+		CR := CR{}
+		err = xml.Unmarshal([]byte(body), &CR)
+		if err != nil {
+			fmt.Println("...or not. Bad or incomplete request. (End processing.)")
+			fmt.Fprint(w, "not good enough for me. ;)")
+			fmt.Printf("error: %v", err)
+			return
+		}
+		fmt.Println(CR)
+		fmt.Println("The request is valid! Responding...")
+		fmt.Fprintf(w, `<?xml version="1.0" encoding="utf-8"?>
 <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" 
 				  xmlns:xsd="http://www.w3.org/2001/XMLSchema" 
 				  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
@@ -269,22 +263,22 @@ func handler(w http.ResponseWriter, r *http.Request) {
 </CheckRegistrationResponse>
 </soapenv:Body>
 </soapenv:Envelope>`)
+		fmt.Println("Delivered response!")
 
-					} else {
+	case []byte("GetRegistrationInfo"):
 
-						if bytes.Contains(body, []byte("GetRegistrationInfo")) {
-							fmt.Println("GRI.")
-							GRI := GRI{}
-							err = xml.Unmarshal([]byte(body), &GRI)
-							if err != nil {
-								fmt.Println("...or not. Bad or incomplete request. (End processing.)")
-								fmt.Fprint(w, "how dirty. ;)")
-								fmt.Printf("error: %v", err)
-								return
-							}
-							fmt.Println(GRI)
-							fmt.Println("The request is valid! Responding...")
-							fmt.Fprintf(w, `<?xml version="1.0" encoding="utf-8"?>
+		fmt.Println("GRI.")
+		GRI := GRI{}
+		err = xml.Unmarshal([]byte(body), &GRI)
+		if err != nil {
+			fmt.Println("...or not. Bad or incomplete request. (End processing.)")
+			fmt.Fprint(w, "how dirty. ;)")
+			fmt.Printf("error: %v", err)
+			return
+		}
+		fmt.Println(GRI)
+		fmt.Println("The request is valid! Responding...")
+		fmt.Fprintf(w, `<?xml version="1.0" encoding="utf-8"?>
 <soapenv:Envelope   xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" 
 					xmlns:xsd="http://www.w3.org/2001/XMLSchema" 
 					xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
@@ -307,22 +301,22 @@ func handler(w http.ResponseWriter, r *http.Request) {
 </GetRegistrationInfoResponse>
 </soapenv:Body>
 </soapenv:Envelope>`)
+		fmt.Println("Delivered response!")
 
-						} else {
+	case []byte("Register"):
 
-							if bytes.Contains(body, []byte("Register")) {
-								fmt.Println("REG.")
-								REG := REG{}
-								err = xml.Unmarshal([]byte(body), &REG)
-								if err != nil {
-									fmt.Println("...or not. Bad or incomplete request. (End processing.)")
-									fmt.Fprint(w, "disgustingly invalid. ;)")
-									fmt.Printf("error: %v", err)
-									return
-								}
-								fmt.Println(REG)
-								fmt.Println("The request is valid! Responding...")
-								fmt.Fprintf(w, `<?xml version="1.0" encoding="utf-8"?>
+		fmt.Println("REG.")
+		REG := REG{}
+		err = xml.Unmarshal([]byte(body), &REG)
+		if err != nil {
+			fmt.Println("...or not. Bad or incomplete request. (End processing.)")
+			fmt.Fprint(w, "disgustingly invalid. ;)")
+			fmt.Printf("error: %v", err)
+			return
+		}
+		fmt.Println(REG)
+		fmt.Println("The request is valid! Responding...")
+		fmt.Fprintf(w, `<?xml version="1.0" encoding="utf-8"?>
 <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" 
 				  xmlns:xsd="http://www.w3.org/2001/XMLSchema" 
 				  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
@@ -342,22 +336,22 @@ func handler(w http.ResponseWriter, r *http.Request) {
 		</RegisterResponse>
 	</soapenv:Body>
 </soapenv:Envelope>`)
+		fmt.Println("Delivered response!")
 
-							} else {
+	case []byte("Unregister"):
 
-								if bytes.Contains(body, []byte("Unregister")) {
-									fmt.Println("UNR.")
-									UNR := UNR{}
-									err = xml.Unmarshal([]byte(body), &UNR)
-									if err != nil {
-										fmt.Println("...or not. Bad or incomplete request. (End processing.)")
-										fmt.Fprint(w, "how abnormal... ;)")
-										fmt.Printf("error: %v", err)
-										return
-									}
-									fmt.Println(UNR)
-									fmt.Println("The request is valid! Responding...")
-									fmt.Fprintf(w, `<?xml version="1.0" encoding="utf-8"?>
+		fmt.Println("UNR.")
+		UNR := UNR{}
+		err = xml.Unmarshal([]byte(body), &UNR)
+		if err != nil {
+			fmt.Println("...or not. Bad or incomplete request. (End processing.)")
+			fmt.Fprint(w, "how abnormal... ;)")
+			fmt.Printf("error: %v", err)
+			return
+		}
+		fmt.Println(UNR)
+		fmt.Println("The request is valid! Responding...")
+		fmt.Fprintf(w, `<?xml version="1.0" encoding="utf-8"?>
 <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 	<soapenv:Body>
 		<UnregisterResponse xmlns="urn:ias.wsapi.broadon.com">
@@ -370,18 +364,10 @@ func handler(w http.ResponseWriter, r *http.Request) {
 		</UnregisterResponse>
 	</soapenv:Body>
 </soapenv:Envelope>`)
-
-								} else {
-									fmt.Println("Nothing sent?")
-									fmt.Fprintf(w, "the bathtub is empty, it needs SOAP. ;)")
-								}
-							}
-						}
-					}
-				}
-			}
-		}
+		fmt.Println("Delivered response!")
 
 	}
+
+	// TODO: Add NUS and CAS SOAP to the case list.
 	fmt.Println("-=End of Request.=-" + "\n")
 }
