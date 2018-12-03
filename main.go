@@ -86,9 +86,10 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// The requests are in byte format, so please use []byte("") when adding a new case.
-	switch body {
+	switch string(body) {
 	// TODO: Make the case functions cleaner. (e.g. The should the response be a variable?)
-	case []byte("CheckDeviceStatus"):
+
+	case "CheckDeviceStatus":
 
 		fmt.Println("CDS.")
 		CDS := CDS{}
@@ -126,7 +127,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 </soapenv:Envelope>`)
 		fmt.Println("Delivered response!")
 
-	case []byte("NotifiedETicketsSynced"):
+	case "NotifiedETicketsSynced":
 
 		fmt.Println("NETS")
 		NETS := NETS{}
@@ -156,7 +157,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 </soapenv:Envelope>`)
 		fmt.Println("Delivered response!")
 
-	case []byte("ListETickets"):
+	case "ListETickets":
 
 		fmt.Println("LET")
 		LET := LET{}
@@ -189,7 +190,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 </soapenv:Envelope>`)
 		fmt.Println("Delivered response!")
 
-	case []byte("PurchaseTitle"):
+	case "PurchaseTitle":
 
 		fmt.Println("PT")
 		PT := PT{}
@@ -233,7 +234,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 </soapenv:Envelope>`)
 		fmt.Println("Delivered response!")
 
-	case []byte("CheckRegistration"):
+	case "CheckRegistration":
 
 		fmt.Println("CR.")
 		CR := CR{}
@@ -265,7 +266,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 </soapenv:Envelope>`)
 		fmt.Println("Delivered response!")
 
-	case []byte("GetRegistrationInfo"):
+	case "GetRegistrationInfo":
 
 		fmt.Println("GRI.")
 		GRI := GRI{}
@@ -303,7 +304,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 </soapenv:Envelope>`)
 		fmt.Println("Delivered response!")
 
-	case []byte("Register"):
+	case "Register":
 
 		fmt.Println("REG.")
 		REG := REG{}
@@ -338,7 +339,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 </soapenv:Envelope>`)
 		fmt.Println("Delivered response!")
 
-	case []byte("Unregister"):
+	case "Unregister":
 
 		fmt.Println("UNR.")
 		UNR := UNR{}
