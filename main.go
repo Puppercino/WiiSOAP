@@ -366,6 +366,9 @@ func handler(w http.ResponseWriter, r *http.Request) {
 </soapenv:Envelope>`)
 		fmt.Println("Delivered response!")
 
+	default:
+		fmt.Fprintf(w, "WiiSOAP can't handle this. Try again later or actually use a Wii instead of a computer.")
+
 	}
 
 	// TODO: Add NUS and CAS SOAP to the case list.
