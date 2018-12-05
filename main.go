@@ -40,14 +40,17 @@ const (
 // CheckError makes error handling not as ugly and inefficient.
 func CheckError(e error) {
 	if e != nil {
-		log.Fatal("There has been an error while performing this action. Reason: ", e)
+		log.Fatal("WiiSOAP forgot how to drive and crashed! Reason: ", e)
 	}
 }
 
 func main() {
 
+	// Initial Start.
 	fmt.Println("WiiSOAP 0.2.2 Kawauso")
 	fmt.Println("Reading the Config...")
+
+	// Check the Config.
 	configfile, err := os.Open("./config.xml")
 	CheckError(err)
 	ioconfig, err := ioutil.ReadAll(configfile)
@@ -65,11 +68,13 @@ func main() {
 	CheckError(err)
 	defer db.Close()
 
+	// Start the HTTP server.
 	fmt.Println("Starting HTTP connection (" + CON.Port + ")...")
-	fmt.Println("NOTICE: The SOAP Server runs under a port that doesn't work with WSC naturally.")
-	fmt.Println("You can either use proxying from Nginx (recommended) or another web server software, or edit this script to use port 80.")
+	fmt.Println("Not using the usual port for HTTP? Be sure to use a proxy, otherwise the Wii can't connect!")
 	http.HandleFunc("/", handler) // each request calls handler
 	log.Fatal(http.ListenAndServe(CON.Port, nil))
+
+	// From here on out, all special cool things should go into the handler function.
 }
 
 func handler(w http.ResponseWriter, r *http.Request) {
@@ -85,9 +90,10 @@ func handler(w http.ResponseWriter, r *http.Request) {
 			http.StatusInternalServerError)
 	}
 
-	// The requests are in byte format, so please use []byte("") when adding a new case.
+	// The switch converts the HTTP Body of the request into a string. There is no need to convert the cases to byte format.
 	switch string(body) {
 	// TODO: Make the case functions cleaner. (e.g. The should the response be a variable?)
+	// TODO: Update the responses so that they query the SQL Database for the proper information (e.g. Device Code, Token, etc).
 
 	case "CheckDeviceStatus":
 
@@ -97,7 +103,6 @@ func handler(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			fmt.Println("...or not. Bad or incomplete request. (End processing.)")
 			fmt.Fprint(w, "You need to POST some SOAP from WSC if you wanna get some, honey. ;)")
-			fmt.Printf("error: %v", err)
 			return
 		}
 		fmt.Println(CDS)
