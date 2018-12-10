@@ -64,9 +64,12 @@ func main() {
 
 	// Start SQL.
 	db, err := sql.Open("mysql",
-		CON.SQLUser+":"+CON.SQLPass+"@tcp(127.0.0.1:3306)/hello")
+		CON.SQLUser+":"+CON.SQLPass+"@tcp("+CON.SQLPort+")/"+CON.SQLDB)
 	CheckError(err)
+
 	defer db.Close()
+	err = db.Ping()
+	CheckError(err)
 
 	// Start the HTTP server.
 	fmt.Println("Starting HTTP connection (" + CON.Port + ")...")
@@ -92,7 +95,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 
 	// The switch converts the HTTP Body of the request into a string. There is no need to convert the cases to byte format.
 	switch string(body) {
-	// TODO: Make the case functions cleaner. (e.g. The should the response be a variable?)
+	// TODO: Make the case functions cleaner. (e.g. Should the response be a variable?)
 	// TODO: Update the responses so that they query the SQL Database for the proper information (e.g. Device Code, Token, etc).
 
 	case "CheckDeviceStatus":

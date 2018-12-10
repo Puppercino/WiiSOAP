@@ -1,6 +1,8 @@
 package main
 
-import "encoding/xml"
+import (
+	"encoding/xml"
+)
 
 //	Copyright (C) 2018  CornierKhan1
 //
@@ -28,7 +30,9 @@ type Config struct {
 	XMLName xml.Name `xml:"Config"`
 	SQLUser string   `xml:"SQLUser"`
 	SQLPass string   `xml:"SQLPass"`
+	SQLPort string   `xml:"SQLPort"`
 	Port    string   `xml:"Port"`
+	SQLDB   string   `xml:"SQLDB"`
 }
 
 // CheckDeviceStatus

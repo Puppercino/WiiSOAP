@@ -1,6 +1,8 @@
 <Config>
     <SQLUser>uwu</SQLUser>
     <SQLPass>owo</SQLPass>
+    <SQLDB>uwu</SQLDB>
+    <SQLPort>127.0.0.1:3306</SQLPort>
     <Port>127.0.0.1:8080</Port>
     <!-- Please use an address for the port. Failing to do so will cause oddities to occur with WiiSOAP. -->
 </Config>
