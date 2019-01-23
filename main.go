@@ -47,7 +47,7 @@ func CheckError(e error) {
 func main() {
 
 	// Initial Start.
-	fmt.Println("WiiSOAP 0.2.3 Kawauso")
+	fmt.Println("WiiSOAP 0.2.4 Kawauso")
 	fmt.Println("Reading the Config...")
 
 	// Check the Config.
