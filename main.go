@@ -21,13 +21,14 @@ import (
 	"database/sql"
 	"encoding/xml"
 	"fmt"
-	_ "github.com/go-sql-driver/mysql"
 	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
 	"strconv"
 	"time"
+
+	_ "github.com/go-sql-driver/mysql"
 )
 
 const (
@@ -40,15 +41,13 @@ const (
 // CheckError makes error handling not as ugly and inefficient.
 func CheckError(e error) {
 	if e != nil {
-		log.Fatal("WiiSOAP forgot how to drive and crashed! Reason: ", e)
+		log.Fatal("WiiSOAP forgot how to drive and suddenly crashed! Reason: ", e)
 	}
 }
 
 func main() {
-
 	// Initial Start.
-	fmt.Println("WiiSOAP 0.2.4 Kawauso")
-	fmt.Println("Reading the Config...")
+	fmt.Println("WiiSOAP 0.2.4 Kawauso\nReading the Config...")
 
 	// Check the Config.
 	configfile, err := os.Open("./config.xml")
@@ -63,8 +62,7 @@ func main() {
 	fmt.Println("Initializing core...")
 
 	// Start SQL.
-	db, err := sql.Open("mysql",
-		CON.SQLUser+":"+CON.SQLPass+"@tcp("+CON.SQLPort+")/"+CON.SQLDB)
+	db, err := sql.Open("mysql", fmt.Sprintf("%s:%s@tcp(%s)/%s)", CON.SQLUser, CON.SQLPass, CON.SQLPort, CON.SQLDB))
 	CheckError(err)
 
 	defer db.Close()
@@ -72,8 +70,7 @@ func main() {
 	CheckError(err)
 
 	// Start the HTTP server.
-	fmt.Println("Starting HTTP connection (" + CON.Port + ")...")
-	fmt.Println("Not using the usual port for HTTP? Be sure to use a proxy, otherwise the Wii can't connect!")
+	fmt.Printf("Starting HTTP connection (%s)...\nNot using the usual port for HTTP? Be sure to use a proxy, otherwise the Wii can't connect!", CON.Port)
 	http.HandleFunc("/", handler) // each request calls handler
 	log.Fatal(http.ListenAndServe(CON.Port, nil))
 
@@ -81,7 +78,6 @@ func main() {
 }
 
 func handler(w http.ResponseWriter, r *http.Request) {
-
 	// Get a sexy new timestamp to use.
 	timestampnano := strconv.FormatInt(time.Now().UTC().Unix(), 10)
 	timestamp := timestampnano + "000"
@@ -89,8 +85,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("-=Incoming request!=-")
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
-		http.Error(w, "Error reading request body...",
-			http.StatusInternalServerError)
+		http.Error(w, "Error reading request body...", http.StatusInternalServerError)
 	}
 
 	// The switch converts the HTTP Body of the request into a string. There is no need to convert the cases to byte format.
@@ -99,48 +94,43 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	// TODO: Update the responses so that they query the SQL Database for the proper information (e.g. Device Code, Token, etc).
 
 	case "CheckDeviceStatus":
-
 		fmt.Println("CDS.")
 		CDS := CDS{}
-		err = xml.Unmarshal([]byte(body), &CDS)
-		if err != nil {
+		if err = xml.Unmarshal(body, &CDS); os.IsExist(err) {
 			fmt.Println("...or not. Bad or incomplete request. (End processing.)")
 			fmt.Fprint(w, "You need to POST some SOAP from WSC if you wanna get some, honey. ;)")
 			return
 		}
 		fmt.Println(CDS)
 		fmt.Println("The request is valid! Responding...")
-		fmt.Fprintf(w, `
-<?xml version="1.0" encoding="utf-8"?>
+		fmt.Fprintf(w, `<?xml version="1.0" encoding="utf-8"?>
 <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" 
-				  xmlns:xsd="http://www.w3.org/2001/XMLSchema" 
-				  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-<soapenv:Body>
-<CheckDeviceStatusResponse xmlns="urn:ecs.wsapi.broadon.com">
-	<Version>`+CDS.Version+`</Version>
-	<DeviceId>`+CDS.DeviceId+`</DeviceId>
-	<MessageId>`+CDS.MessageId+`</MessageId>
-	<TimeStamp>`+timestamp+`</TimeStamp>
-	<ErrorCode>0</ErrorCode>
-	<ServiceStandbyMode>false</ServiceStandbyMode>
-	<Balance>
-		<Amount>2018</Amount>
-		<Currency>POINTS</Currency>
-	</Balance>
-	<ForceSyncTime>0</ForceSyncTime>
-	<ExtTicketTime>`+timestamp+`</ExtTicketTime>
-	<SyncTime>`+timestamp+`</SyncTime>
-</CheckDeviceStatusResponse>
-</soapenv:Body>
-</soapenv:Envelope>`)
+	  	xmlns:xsd="http://www.w3.org/2001/XMLSchema" 
+	  	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<soapenv:Body>
+		<CheckDeviceStatusResponse xmlns="urn:ecs.wsapi.broadon.com">
+			<Version>%s</Version>
+			<DeviceId>%s</DeviceId>
+			<MessageId>%s</MessageId>
+			<TimeStamp>%s</TimeStamp>
+			<ErrorCode>0</ErrorCode>
+			<ServiceStandbyMode>false</ServiceStandbyMode>
+			<Balance>
+				<Amount>2018</Amount>
+				<Currency>POINTS</Currency>
+			</Balance>
+			<ForceSyncTime>0</ForceSyncTime>
+			<ExtTicketTime>%s</ExtTicketTime>
+			<SyncTime>%s</SyncTime>
+		</CheckDeviceStatusResponse>
+	</soapenv:Body>
+</soapenv:Envelope>`, CDS.Version, CDS.DeviceID, CDS.MessageID, timestamp, timestamp, timestamp)
 		fmt.Println("Delivered response!")
 
 	case "NotifiedETicketsSynced":
-
 		fmt.Println("NETS")
 		NETS := NETS{}
-		err = xml.Unmarshal([]byte(body), &NETS)
-		if err != nil {
+		if err = xml.Unmarshal(body, &NETS); os.IsExist(err) {
 			fmt.Println("...or not. Bad or incomplete request. (End processing.)")
 			fmt.Fprint(w, "This is a disgusting request, but 20 dollars is 20 dollars. ;)")
 			fmt.Printf("error: %v", err)
@@ -150,27 +140,25 @@ func handler(w http.ResponseWriter, r *http.Request) {
 		fmt.Println("The request is valid! Responding...")
 		fmt.Fprintf(w, `<?xml version="1.0" encoding="utf-8"?>
 <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" 
-				  xmlns:xsd="http://www.w3.org/2001/XMLSchema" 
-				  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-<soapenv:Body>
-<NotifyETicketsSyncedResponse xmlns="urn:ecs.wsapi.broadon.com">
-	<Version>`+NETS.Version+`</Version>
-	<DeviceId>`+NETS.DeviceId+`</DeviceId>
-	<MessageId>`+NETS.MessageId+`</MessageId>
-	<TimeStamp>`+timestamp+`</TimeStamp>
-	<ErrorCode>0</ErrorCode>
-	<ServiceStandbyMode>false</ServiceStandbyMode>
-</NotifyETicketsSyncedResponse>
-</soapenv:Body>
-</soapenv:Envelope>`)
+			xmlns:xsd="http://www.w3.org/2001/XMLSchema" 
+			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+		<soapenv:Body>
+			<NotifyETicketsSyncedResponse xmlns="urn:ecs.wsapi.broadon.com">
+				<Version>%s</Version>
+				<DeviceId>%s</DeviceId>
+				<MessageId>%s</MessageId>
+				<TimeStamp>%s</TimeStamp>
+				<ErrorCode>0</ErrorCode>
+				<ServiceStandbyMode>false</ServiceStandbyMode>
+			</NotifyETicketsSyncedResponse>
+	</soapenv:Body>
+</soapenv:Envelope>`, NETS.Version, NETS.DeviceID, NETS.MessageID, timestamp)
 		fmt.Println("Delivered response!")
 
 	case "ListETickets":
-
 		fmt.Println("LET")
 		LET := LET{}
-		err = xml.Unmarshal([]byte(body), &LET)
-		if err != nil {
+		if err = xml.Unmarshal(body, &LET); os.IsExist(err) {
 			fmt.Println("...or not. Bad or incomplete request. (End processing.)")
 			fmt.Fprint(w, "This is a disgusting request, but 20 dollars is 20 dollars. ;)")
 			fmt.Printf("error: %v", err)
@@ -179,183 +167,173 @@ func handler(w http.ResponseWriter, r *http.Request) {
 		fmt.Println(LET)
 		fmt.Println("The request is valid! Responding...")
 		fmt.Fprintf(w, `<?xml version="1.0" encoding="utf-8"?>
-<soapenv:Envelope   xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" 
-					xmlns:xsd="http://www.w3.org/2001/XMLSchema" 
-					xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-<soapenv:Body>
-<ListETicketsResponse xmlns="urn:ecs.wsapi.broadon.com">
-	<Version>`+LET.Version+`</Version>
-	<DeviceId>`+LET.DeviceId+`</DeviceId>
-	<MessageId>`+LET.MessageId+`</MessageId>
-	<TimeStamp>`+timestamp+`</TimeStamp>
-	<ErrorCode>0</ErrorCode>
-	<ServiceStandbyMode>false</ServiceStandbyMode>
-	<ForceSyncTime>0</ForceSyncTime>
-	<ExtTicketTime>`+timestamp+`</ExtTicketTime>
-	<SyncTime>`+timestamp+`</SyncTime>
-</ListETicketsResponse>
-</soapenv:Body>
-</soapenv:Envelope>`)
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" 
+		xmlns:xsd="http://www.w3.org/2001/XMLSchema" 
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<soapenv:Body>
+		<ListETicketsResponse xmlns="urn:ecs.wsapi.broadon.com">
+			<Version>%s</Version>
+			<DeviceId>%s</DeviceId>
+			<MessageId>%s</MessageId>
+			<TimeStamp>%s</TimeStamp>
+			<ErrorCode>0</ErrorCode>
+			<ServiceStandbyMode>false</ServiceStandbyMode>
+			<ForceSyncTime>0</ForceSyncTime>
+			<ExtTicketTime>%s</ExtTicketTime>
+			<SyncTime>%s</SyncTime>
+		</ListETicketsResponse>
+	</soapenv:Body>
+</soapenv:Envelope>`, LET.Version, LET.DeviceID, LET.MessageID, timestamp, timestamp, timestamp)
 		fmt.Println("Delivered response!")
 
 	case "PurchaseTitle":
-
 		fmt.Println("PT")
 		PT := PT{}
-		err = xml.Unmarshal([]byte(body), &PT)
-		if err != nil {
+		if err = xml.Unmarshal(body, &PT); os.IsExist(err) {
 			fmt.Println("...or not. Bad or incomplete request. (End processing.)")
 			fmt.Fprint(w, "if you wanna fun time, its gonna cost ya extra sweetie. ;)")
-			fmt.Printf("error: %v", err)
+			fmt.Printf("Error: %s", err.Error())
 			return
 		}
 		fmt.Println(PT)
 		fmt.Println("The request is valid! Responding...")
 		fmt.Fprintf(w, `<?xml version="1.0" encoding="utf-8"?>
 <soapenv:Envelope	xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" 
-					xmlns:xsd="http://www.w3.org/2001/XMLSchema" 
-					xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-<soapenv:Body>
-<PurchaseTitleResponse xmlns="urn:ecs.wsapi.broadon.com">
-	<Version>`+PT.Version+`</Version>
-	<DeviceId>`+PT.DeviceId+`</DeviceId>
-	<MessageId>`+PT.MessageId+`</MessageId>
-	<TimeStamp>`+timestamp+`</TimeStamp>
-	<ErrorCode>0</ErrorCode>
-	<ServiceStandbyMode>false</ServiceStandbyMode>
-	<Balance>
-		<Amount>2018</Amount>
-		<Currency>POINTS</Currency>
-	</Balance>
-	<Transactions>
-		<TransactionId>00000000</TransactionId>
-		<Date>`+timestamp+`</Date>
-		<Type>PURCHGAME</Type>
-	</Transactions>
-	<SyncTime>`+timestamp+`</SyncTime>
-	<ETickets>00000000</ETickets>
-	<Certs>00000000</Certs>
-	<Certs>00000000</Certs>
-	<TitleId>00000000</TitleId>
-</PurchaseTitleResponse>
-</soapenv:Body>
-</soapenv:Envelope>`)
+		xmlns:xsd="http://www.w3.org/2001/XMLSchema" 
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<soapenv:Body>
+		<PurchaseTitleResponse xmlns="urn:ecs.wsapi.broadon.com">
+			<Version>%s</Version>
+			<DeviceId>%s</DeviceId>
+			<MessageId>%s</MessageId>
+			<TimeStamp>%s</TimeStamp>
+			<ErrorCode>0</ErrorCode>
+			<ServiceStandbyMode>false</ServiceStandbyMode>
+			<Balance>
+				<Amount>2018</Amount>
+				<Currency>POINTS</Currency>
+			</Balance>
+			<Transactions>
+				<TransactionId>00000000</TransactionId>
+				<Date>%s</Date>
+				<Type>PURCHGAME</Type>
+			</Transactions>
+			<SyncTime>%s</SyncTime>
+			<ETickets>00000000</ETickets>
+			<Certs>00000000</Certs>
+			<Certs>00000000</Certs>
+			<TitleId>00000000</TitleId>
+		</PurchaseTitleResponse>
+	</soapenv:Body>
+</soapenv:Envelope>`, PT.Version, PT.DeviceID, PT.MessageID, timestamp, timestamp, timestamp)
 		fmt.Println("Delivered response!")
 
 	case "CheckRegistration":
-
 		fmt.Println("CR.")
 		CR := CR{}
-		err = xml.Unmarshal([]byte(body), &CR)
-		if err != nil {
+		if err = xml.Unmarshal(body, &CR); os.IsExist(err) {
 			fmt.Println("...or not. Bad or incomplete request. (End processing.)")
 			fmt.Fprint(w, "not good enough for me. ;)")
-			fmt.Printf("error: %v", err)
+			fmt.Printf("Error: %s", err.Error())
 			return
 		}
 		fmt.Println(CR)
 		fmt.Println("The request is valid! Responding...")
 		fmt.Fprintf(w, `<?xml version="1.0" encoding="utf-8"?>
 <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" 
-				  xmlns:xsd="http://www.w3.org/2001/XMLSchema" 
-				  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+		xmlns:xsd="http://www.w3.org/2001/XMLSchema" 
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 <soapenv:Body>
 <CheckRegistrationResponse xmlns="urn:ias.wsapi.broadon.com">
-	<Version>`+CR.Version+`</Version>
-	<DeviceId>`+CR.DeviceId+`</DeviceId>
-	<MessageId>`+CR.DeviceId+`</MessageId>
-	<TimeStamp>`+timestamp+`</TimeStamp>
+	<Version>%s</Version>
+	<DeviceId>%s</DeviceId>
+	<MessageId>%s</MessageId>
+	<TimeStamp>%s</TimeStamp>
 	<ErrorCode>0</ErrorCode>
 	<ServiceStandbyMode>false</ServiceStandbyMode>
-	<OriginalSerialNumber>`+CR.SerialNo+`</OriginalSerialNumber>
+	<OriginalSerialNumber>%s</OriginalSerialNumber>
 	<DeviceStatus>R</DeviceStatus>
 </CheckRegistrationResponse>
 </soapenv:Body>
-</soapenv:Envelope>`)
+</soapenv:Envelope>`, CR.Version, CR.DeviceID, CR.DeviceID, timestamp, CR.SerialNo)
 		fmt.Println("Delivered response!")
 
 	case "GetRegistrationInfo":
-
 		fmt.Println("GRI.")
 		GRI := GRI{}
-		err = xml.Unmarshal([]byte(body), &GRI)
-		if err != nil {
+		if err = xml.Unmarshal(body, &GRI); os.IsExist(err) {
 			fmt.Println("...or not. Bad or incomplete request. (End processing.)")
 			fmt.Fprint(w, "how dirty. ;)")
-			fmt.Printf("error: %v", err)
+			fmt.Printf("Error: %s", err.Error())
 			return
 		}
 		fmt.Println(GRI)
 		fmt.Println("The request is valid! Responding...")
 		fmt.Fprintf(w, `<?xml version="1.0" encoding="utf-8"?>
 <soapenv:Envelope   xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" 
-					xmlns:xsd="http://www.w3.org/2001/XMLSchema" 
-					xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-<soapenv:Body>
-<GetRegistrationInfoResponse xmlns="urn:ias.wsapi.broadon.com">
-	<Version>`+GRI.Version+`</Version>
-	<DeviceId>`+GRI.DeviceId+`</DeviceId>
-	<MessageId>`+GRI.MessageId+`</MessageId>
-	<TimeStamp>`+timestamp+`</TimeStamp>
-	<ErrorCode>0</ErrorCode>
-	<ServiceStandbyMode>false</ServiceStandbyMode>
-	<AccountId>`+GRI.AccountId+`</AccountId>
-	<DeviceToken>00000000</DeviceToken>
-	<DeviceTokenExpired>false</DeviceTokenExpired>
-	<Country>`+GRI.Country+`</Country>
-	<ExtAccountId></ExtAccountId>
-	<DeviceCode>0000000000000000</DeviceCode>
-	<DeviceStatus>R</DeviceStatus>
-	<Currency>POINTS</Currency>
-</GetRegistrationInfoResponse>
-</soapenv:Body>
-</soapenv:Envelope>`)
+		xmlns:xsd="http://www.w3.org/2001/XMLSchema" 
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<soapenv:Body>
+		<GetRegistrationInfoResponse xmlns="urn:ias.wsapi.broadon.com">
+			<Version>%s</Version>
+			<DeviceId>%s</DeviceId>
+			<MessageId>%s</MessageId>
+			<TimeStamp>%s</TimeStamp>
+			<ErrorCode>0</ErrorCode>
+			<ServiceStandbyMode>false</ServiceStandbyMode>
+			<AccountId>%s</AccountId>
+			<DeviceToken>00000000</DeviceToken>
+			<DeviceTokenExpired>false</DeviceTokenExpired>
+			<Country>%s</Country>
+			<ExtAccountId></ExtAccountId>
+			<DeviceCode>0000000000000000</DeviceCode>
+			<DeviceStatus>R</DeviceStatus>
+			<Currency>POINTS</Currency>
+		</GetRegistrationInfoResponse>
+	</soapenv:Body>
+</soapenv:Envelope>`, GRI.Version, GRI.DeviceID, GRI.MessageID, timestamp, GRI.AccountID, GRI.Country)
 		fmt.Println("Delivered response!")
 
 	case "Register":
-
 		fmt.Println("REG.")
 		REG := REG{}
-		err = xml.Unmarshal([]byte(body), &REG)
-		if err != nil {
+		if err = xml.Unmarshal(body, &REG); os.IsExist(err) {
 			fmt.Println("...or not. Bad or incomplete request. (End processing.)")
 			fmt.Fprint(w, "disgustingly invalid. ;)")
-			fmt.Printf("error: %v", err)
+			fmt.Printf("Error: %s", err.Error())
 			return
 		}
 		fmt.Println(REG)
 		fmt.Println("The request is valid! Responding...")
 		fmt.Fprintf(w, `<?xml version="1.0" encoding="utf-8"?>
 <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" 
-				  xmlns:xsd="http://www.w3.org/2001/XMLSchema" 
-				  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+		xmlns:xsd="http://www.w3.org/2001/XMLSchema" 
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 	<soapenv:Body>
 		<RegisterResponse xmlns="urn:ias.wsapi.broadon.com">
-			<Version>`+REG.Version+`</Version>
-			<DeviceId>`+REG.DeviceId+`</DeviceId>
-			<MessageId>`+REG.MessageId+`</MessageId>
-			<TimeStamp>`+timestamp+`</TimeStamp>
+			<Version>%s</Version>
+			<DeviceId>%s</DeviceId>
+			<MessageId>%s</MessageId>
+			<TimeStamp>%s</TimeStamp>
 			<ErrorCode>0</ErrorCode>
 			<ServiceStandbyMode>false</ServiceStandbyMode>
-			<AccountId>`+REG.AccountId+`</AccountId>
+			<AccountId>%s</AccountId>
 			<DeviceToken>00000000</DeviceToken>
-			<Country>`+REG.Country+`</Country>
+			<Country>%s</Country>
 			<ExtAccountId></ExtAccountId>
 			<DeviceCode>00000000</DeviceCode>
 		</RegisterResponse>
 	</soapenv:Body>
-</soapenv:Envelope>`)
+</soapenv:Envelope>`, REG.Version, REG.DeviceID, REG.MessageID, timestamp, REG.AccountID, REG.Country)
 		fmt.Println("Delivered response!")
 
 	case "Unregister":
-
 		fmt.Println("UNR.")
 		UNR := UNR{}
-		err = xml.Unmarshal([]byte(body), &UNR)
-		if err != nil {
+		if err = xml.Unmarshal(body, &UNR); os.IsExist(err) {
 			fmt.Println("...or not. Bad or incomplete request. (End processing.)")
 			fmt.Fprint(w, "how abnormal... ;)")
-			fmt.Printf("error: %v", err)
+			fmt.Printf("Error: %s", err.Error())
 			return
 		}
 		fmt.Println(UNR)
@@ -364,20 +342,19 @@ func handler(w http.ResponseWriter, r *http.Request) {
 <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 	<soapenv:Body>
 		<UnregisterResponse xmlns="urn:ias.wsapi.broadon.com">
-			<Version>`+UNR.Version+`</Version>
-			<DeviceId>`+UNR.DeviceId+`</DeviceId>
-			<MessageId>`+UNR.MessageId+`</MessageId>
-			<TimeStamp>`+timestamp+`</TimeStamp>
+			<Version>%s</Version>
+			<DeviceId>%s</DeviceId>
+			<MessageId>%s</MessageId>
+			<TimeStamp>%s</TimeStamp>
 			<ErrorCode>0</ErrorCode>
 		<ServiceStandbyMode>false</ServiceStandbyMode>
 		</UnregisterResponse>
 	</soapenv:Body>
-</soapenv:Envelope>`)
+</soapenv:Envelope>`, UNR.Version, UNR.DeviceID, UNR.MessageID, timestamp)
 		fmt.Println("Delivered response!")
 
 	default:
 		fmt.Fprintf(w, "WiiSOAP can't handle this. Try again later or actually use a Wii instead of a computer.")
-
 	}
 
 	// TODO: Add NUS and CAS SOAP to the case list.
