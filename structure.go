@@ -1,8 +1,6 @@
 package main
 
-import (
-	"encoding/xml"
-)
+import "encoding/xml"
 
 //	Copyright (C) 2018-2019  CornierKhan1
 //
@@ -26,6 +24,7 @@ import (
 /////////////////////
 // The structures may seem repetitive and redundant, but blame WSC's inconsistent SOAP requests.
 
+// Config - WiiSOAP Configuration data.
 type Config struct {
 	XMLName xml.Name `xml:"Config"`
 	SQLUser string   `xml:"SQLUser"`
@@ -35,71 +34,71 @@ type Config struct {
 	SQLDB   string   `xml:"SQLDB"`
 }
 
-// CheckDeviceStatus
+// CDS - CheckDeviceStatus
 type CDS struct {
 	XMLName   xml.Name `xml:"Envelope"`
 	Version   string   `xml:"Body>CheckDeviceStatus>Version"`
-	DeviceId  string   `xml:"Body>CheckDeviceStatus>DeviceId"`
-	MessageId string   `xml:"Body>CheckDeviceStatus>MessageId"`
+	DeviceID  string   `xml:"Body>CheckDeviceStatus>DeviceId"`
+	MessageID string   `xml:"Body>CheckDeviceStatus>MessageId"`
 }
 
-// NotifiedETicketsSynced
+// NETS - NotifiedETicketsSynced
 type NETS struct {
 	XMLName   xml.Name `xml:"Envelope"`
 	Version   string   `xml:"Body>NotifiedETicketsSynced>Version"`
-	DeviceId  string   `xml:"Body>NotifiedETicketsSynced>DeviceId"`
-	MessageId string   `xml:"Body>NotifiedETicketsSynced>MessageId"`
+	DeviceID  string   `xml:"Body>NotifiedETicketsSynced>DeviceId"`
+	MessageID string   `xml:"Body>NotifiedETicketsSynced>MessageId"`
 }
 
-// ListETickets
+// LET - ListETickets
 type LET struct {
 	XMLName   xml.Name `xml:"Envelope"`
 	Version   string   `xml:"Body>ListETickets>Version"`
-	DeviceId  string   `xml:"Body>ListETickets>DeviceId"`
-	MessageId string   `xml:"Body>ListETickets>MessageId"`
+	DeviceID  string   `xml:"Body>ListETickets>DeviceId"`
+	MessageID string   `xml:"Body>ListETickets>MessageId"`
 }
 
-// PurchaseTitle
+// PT - PurchaseTitle
 type PT struct {
 	XMLName   xml.Name `xml:"Envelope"`
 	Version   string   `xml:"Body>PurchaseTitle>Version"`
-	DeviceId  string   `xml:"Body>PurchaseTitle>DeviceId"`
-	MessageId string   `xml:"Body>PurchaseTitle>MessageId"`
+	DeviceID  string   `xml:"Body>PurchaseTitle>DeviceId"`
+	MessageID string   `xml:"Body>PurchaseTitle>MessageId"`
 }
 
-// CheckRegistration
+// CR - CheckRegistration
 type CR struct {
 	XMLName   xml.Name `xml:"Envelope"`
 	Version   string   `xml:"Body>CheckRegistration>Version"`
-	DeviceId  string   `xml:"Body>CheckRegistration>DeviceId"`
-	MessageId string   `xml:"Body>CheckRegistration>MessageId"`
+	DeviceID  string   `xml:"Body>CheckRegistration>DeviceId"`
+	MessageID string   `xml:"Body>CheckRegistration>MessageId"`
 	SerialNo  string   `xml:"Body>CheckRegistration>SerialNumber"`
 }
 
-// GetRegistrationInfo
+// GRI - GetRegistrationInfo
 type GRI struct {
 	XMLName   xml.Name `xml:"Envelope"`
 	Version   string   `xml:"Body>GetRegistrationInfo>Version"`
-	DeviceId  string   `xml:"Body>GetRegistrationInfo>DeviceId"`
-	MessageId string   `xml:"Body>GetRegistrationInfo>MessageId"`
-	AccountId string   `xml:"Body>GetRegistrationInfo>AccountId"`
+	DeviceID  string   `xml:"Body>GetRegistrationInfo>DeviceId"`
+	MessageID string   `xml:"Body>GetRegistrationInfo>MessageId"`
+	AccountID string   `xml:"Body>GetRegistrationInfo>AccountId"`
 	Country   string   `xml:"Body>GetRegistrationInfo>Country"`
 }
 
-// Register
+// REG - Register
 type REG struct {
 	XMLName   xml.Name `xml:"Envelope"`
 	Version   string   `xml:"Body>Register>Version"`
-	DeviceId  string   `xml:"Body>Register>DeviceId"`
-	MessageId string   `xml:"Body>Register>MessageId"`
-	AccountId string   `xml:"Body>Register>AccountId"`
+	DeviceID  string   `xml:"Body>Register>DeviceId"`
+	MessageID string   `xml:"Body>Register>MessageId"`
+	AccountID string   `xml:"Body>Register>AccountId"`
 	Country   string   `xml:"Body>Register>Country"`
 }
 
-// Unregister
+// UNR - Unregister
 type UNR struct {
 	XMLName   xml.Name `xml:"Envelope"`
 	Version   string   `xml:"Body>Unregister>Version"`
-	DeviceId  string   `xml:"Body>Unregister>DeviceId"`
-	MessageId string   `xml:"Body>Unregister>MessageId"`
+	DeviceID  string   `xml:"Body>Unregister>DeviceId"`
+	MessageID string   `xml:"Body>Unregister>MessageId"`
 }
