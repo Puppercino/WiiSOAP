@@ -7,6 +7,11 @@ This is the SOAP Server Software. The other repository only has the communicatio
 # Changelog
 Versions on this software are based on goals. (e.g 0.2 works towards SQL support. 0.3 works towards NUS support, etc.)
 ## 0.2.x Kawauso
+### 0.2.5
+- Fixed lint errors.
+- Uses Fprintf properly now.
+- Uses `if err = action(); os.IsExist(err) {}` now. This makes error checks a little bit shorter.
+- Changed `Port` to `Address` in the `config.xml` file.
 ### 0.2.4
 - Added SQL skeleton.
 - Edited config template.
