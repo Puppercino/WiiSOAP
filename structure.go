@@ -27,11 +27,13 @@ import "encoding/xml"
 // Config - WiiSOAP Configuration data.
 type Config struct {
 	XMLName xml.Name `xml:"Config"`
-	SQLUser string   `xml:"SQLUser"`
-	SQLPass string   `xml:"SQLPass"`
-	SQLPort string   `xml:"SQLPort"`
-	Port    string   `xml:"Port"`
-	SQLDB   string   `xml:"SQLDB"`
+
+	Address string `xml:"Address"`
+
+	SQLUser string `xml:"SQLUser"`
+	SQLPass string `xml:"SQLPass"`
+	SQLPort string `xml:"SQLPort"`
+	SQLDB   string `xml:"SQLDB"`
 }
 
 // CDS - CheckDeviceStatus

@@ -70,9 +70,9 @@ func main() {
 	CheckError(err)
 
 	// Start the HTTP server.
-	fmt.Printf("Starting HTTP connection (%s)...\nNot using the usual port for HTTP? Be sure to use a proxy, otherwise the Wii can't connect!", CON.Port)
+	fmt.Printf("Starting HTTP connection (%s)...\nNot using the usual port for HTTP? Be sure to use a proxy, otherwise the Wii can't connect!", CON.Address)
 	http.HandleFunc("/", handler) // each request calls handler
-	log.Fatal(http.ListenAndServe(CON.Port, nil))
+	log.Fatal(http.ListenAndServe(CON.Address, nil))
 
 	// From here on out, all special cool things should go into the handler function.
 }
