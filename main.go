@@ -65,6 +65,7 @@ func main() {
 	db, err := sql.Open("mysql", fmt.Sprintf("%s:%s@tcp(%s)/%s)", CON.SQLUser, CON.SQLPass, CON.SQLPort, CON.SQLDB))
 	CheckError(err)
 
+	// Close SQL after everything else is done.
 	defer db.Close()
 	err = db.Ping()
 	CheckError(err)
