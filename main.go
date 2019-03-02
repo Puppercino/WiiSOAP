@@ -1,6 +1,6 @@
 //	Copyright (C) 2018-2019  CornierKhan1
 //
-//	WiiSOAP is Open Shop Channel's SOAP Server Software, designed specifically to handle Wii Shop Channel SOAP.
+//	WiiSOAP is SOAP Server Software, designed specifically to handle Wii Shop Channel SOAP.
 //
 //    This program is free software: you can redistribute it and/or modify
 //    it under the terms of the GNU Affero General Public License as published
