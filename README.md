@@ -8,6 +8,7 @@ This is the SOAP Server Software. The other repository only has the communicatio
 Versions on this software are based on goals. (e.g 0.2 works towards SQL support. 0.3 works towards NUS support, etc.)
 ## 0.2.x Kawauso
 ### 0.2.5
+*This version of WiiSOAP Server was brought to you by Apfel. Thank you for your contribution.*
 - Fixed lint errors.
 - Uses Fprintf properly now.
 - Uses `if err = action(); os.IsExist(err) {}` now. This makes error checks a little bit shorter.
