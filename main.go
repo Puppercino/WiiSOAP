@@ -38,8 +38,8 @@ const (
 	Header = `<?xml version="1.0" encoding="UTF-8"?>` + "\n"
 )
 
-// CheckError makes error handling not as ugly and inefficient.
-func CheckError(err error) {
+// checkError makes error handling not as ugly and inefficient.
+func checkError(err error) {
 	if err != nil {
 		log.Fatalf("WiiSOAP forgot how to drive and suddenly crashed! Reason: %s\n", err.Error())
 	}
@@ -51,24 +51,24 @@ func main() {
 
 	// Check the Config.
 	configfile, err := os.Open("./config.xml")
-	CheckError(err)
+	checkError(err)
 	ioconfig, err := ioutil.ReadAll(configfile)
-	CheckError(err)
+	checkError(err)
 	CON := Config{}
 	err = xml.Unmarshal([]byte(ioconfig), &CON)
 	fmt.Println(CON)
-	CheckError(err)
+	checkError(err)
 
 	fmt.Println("Initializing core...")
 
 	// Start SQL.
 	db, err := sql.Open("mysql", fmt.Sprintf("%s:%s@tcp(%s)/%s)", CON.SQLUser, CON.SQLPass, CON.SQLAddress, CON.SQLDB))
-	CheckError(err)
+	checkError(err)
 
 	// Close SQL after everything else is done.
 	defer db.Close()
 	err = db.Ping()
-	CheckError(err)
+	checkError(err)
 
 	// Start the HTTP server.
 	fmt.Printf("Starting HTTP connection (%s)...\nNot using the usual port for HTTP?\nBe sure to use a proxy, otherwise the Wii can't connect!\n", CON.Address)
