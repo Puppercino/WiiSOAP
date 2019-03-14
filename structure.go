@@ -30,10 +30,10 @@ type Config struct {
 
 	Address string `xml:"Address"`
 
-	SQLUser string `xml:"SQLUser"`
-	SQLPass string `xml:"SQLPass"`
-	SQLPort string `xml:"SQLPort"`
-	SQLDB   string `xml:"SQLDB"`
+	SQLAddress string `xml:"SQLAddress"`
+	SQLUser    string `xml:"SQLUser"`
+	SQLPass    string `xml:"SQLPass"`
+	SQLDB      string `xml:"SQLDB"`
 }
 
 // CDS - CheckDeviceStatus

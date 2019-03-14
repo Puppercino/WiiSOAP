@@ -62,7 +62,7 @@ func main() {
 	fmt.Println("Initializing core...")
 
 	// Start SQL.
-	db, err := sql.Open("mysql", fmt.Sprintf("%s:%s@tcp(%s)/%s)", CON.SQLUser, CON.SQLPass, CON.SQLPort, CON.SQLDB))
+	db, err := sql.Open("mysql", fmt.Sprintf("%s:%s@tcp(%s)/%s)", CON.SQLUser, CON.SQLPass, CON.SQLAddress, CON.SQLDB))
 	CheckError(err)
 
 	// Close SQL after everything else is done.
