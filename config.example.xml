@@ -1,8 +1,8 @@
 <Config>
     <Address>127.0.0.1:8080</Address>
 
+    <SQLAddress>127.0.0.1:3306</SQLAddress>
     <SQLUser>uwu</SQLUser>
     <SQLPass>owo</SQLPass>
     <SQLDB>wiisoap</SQLDB>
-    <SQLPort>127.0.0.1:3306</SQLPort>
 </Config>

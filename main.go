@@ -38,40 +38,40 @@ const (
 	Header = `<?xml version="1.0" encoding="UTF-8"?>` + "\n"
 )
 
-// CheckError makes error handling not as ugly and inefficient.
-func CheckError(e error) {
-	if e != nil {
-		log.Fatal("WiiSOAP forgot how to drive and suddenly crashed! Reason: ", e)
+// checkError makes error handling not as ugly and inefficient.
+func checkError(err error) {
+	if err != nil {
+		log.Fatalf("WiiSOAP forgot how to drive and suddenly crashed! Reason: %s\n", err.Error())
 	}
 }
 
 func main() {
 	// Initial Start.
-	fmt.Println("WiiSOAP 0.2.5 Kawauso\nReading the Config...")
+	fmt.Println("WiiSOAP 0.2.6 Kawauso\nReading the Config...")
 
 	// Check the Config.
 	configfile, err := os.Open("./config.xml")
-	CheckError(err)
+	checkError(err)
 	ioconfig, err := ioutil.ReadAll(configfile)
-	CheckError(err)
+	checkError(err)
 	CON := Config{}
 	err = xml.Unmarshal([]byte(ioconfig), &CON)
 	fmt.Println(CON)
-	CheckError(err)
+	checkError(err)
 
 	fmt.Println("Initializing core...")
 
 	// Start SQL.
-	db, err := sql.Open("mysql", fmt.Sprintf("%s:%s@tcp(%s)/%s)", CON.SQLUser, CON.SQLPass, CON.SQLPort, CON.SQLDB))
-	CheckError(err)
+	db, err := sql.Open("mysql", fmt.Sprintf("%s:%s@tcp(%s)/%s)", CON.SQLUser, CON.SQLPass, CON.SQLAddress, CON.SQLDB))
+	checkError(err)
 
 	// Close SQL after everything else is done.
 	defer db.Close()
 	err = db.Ping()
-	CheckError(err)
+	checkError(err)
 
 	// Start the HTTP server.
-	fmt.Printf("Starting HTTP connection (%s)...\nNot using the usual port for HTTP? Be sure to use a proxy, otherwise the Wii can't connect!", CON.Address)
+	fmt.Printf("Starting HTTP connection (%s)...\nNot using the usual port for HTTP?\nBe sure to use a proxy, otherwise the Wii can't connect!\n", CON.Address)
 	http.HandleFunc("/", handler) // each request calls handler
 	log.Fatal(http.ListenAndServe(CON.Address, nil))
 
@@ -97,9 +97,9 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	case "CheckDeviceStatus":
 		fmt.Println("CDS.")
 		CDS := CDS{}
-		if err = xml.Unmarshal(body, &CDS); os.IsExist(err) {
+		if err = xml.Unmarshal(body, &CDS); err != nil {
 			fmt.Println("...or not. Bad or incomplete request. (End processing.)")
-			fmt.Fprint(w, "You need to POST some SOAP from WSC if you wanna get some, honey. ;)")
+			fmt.Fprint(w, "You need to POST some SOAP from WSC if you wanna get some, honey. ;3")
 			return
 		}
 		fmt.Println(CDS)
@@ -131,9 +131,9 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	case "NotifiedETicketsSynced":
 		fmt.Println("NETS")
 		NETS := NETS{}
-		if err = xml.Unmarshal(body, &NETS); os.IsExist(err) {
+		if err = xml.Unmarshal(body, &NETS); err != nil {
 			fmt.Println("...or not. Bad or incomplete request. (End processing.)")
-			fmt.Fprint(w, "This is a disgusting request, but 20 dollars is 20 dollars. ;)")
+			fmt.Fprint(w, "This is a disgusting request, but 20 dollars is 20 dollars. ;3")
 			fmt.Printf("error: %v", err)
 			return
 		}
@@ -159,9 +159,9 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	case "ListETickets":
 		fmt.Println("LET")
 		LET := LET{}
-		if err = xml.Unmarshal(body, &LET); os.IsExist(err) {
+		if err = xml.Unmarshal(body, &LET); err != nil {
 			fmt.Println("...or not. Bad or incomplete request. (End processing.)")
-			fmt.Fprint(w, "This is a disgusting request, but 20 dollars is 20 dollars. ;)")
+			fmt.Fprint(w, "This is a disgusting request, but 20 dollars is 20 dollars. ;3")
 			fmt.Printf("error: %v", err)
 			return
 		}
@@ -190,9 +190,9 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	case "PurchaseTitle":
 		fmt.Println("PT")
 		PT := PT{}
-		if err = xml.Unmarshal(body, &PT); os.IsExist(err) {
+		if err = xml.Unmarshal(body, &PT); err != nil {
 			fmt.Println("...or not. Bad or incomplete request. (End processing.)")
-			fmt.Fprint(w, "if you wanna fun time, its gonna cost ya extra sweetie. ;)")
+			fmt.Fprint(w, "if you wanna fun time, its gonna cost ya extra sweetie. ;3")
 			fmt.Printf("Error: %s", err.Error())
 			return
 		}
@@ -232,9 +232,9 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	case "CheckRegistration":
 		fmt.Println("CR.")
 		CR := CR{}
-		if err = xml.Unmarshal(body, &CR); os.IsExist(err) {
+		if err = xml.Unmarshal(body, &CR); err != nil {
 			fmt.Println("...or not. Bad or incomplete request. (End processing.)")
-			fmt.Fprint(w, "not good enough for me. ;)")
+			fmt.Fprint(w, "not good enough for me. ;3")
 			fmt.Printf("Error: %s", err.Error())
 			return
 		}
@@ -262,9 +262,9 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	case "GetRegistrationInfo":
 		fmt.Println("GRI.")
 		GRI := GRI{}
-		if err = xml.Unmarshal(body, &GRI); os.IsExist(err) {
+		if err = xml.Unmarshal(body, &GRI); err != nil {
 			fmt.Println("...or not. Bad or incomplete request. (End processing.)")
-			fmt.Fprint(w, "how dirty. ;)")
+			fmt.Fprint(w, "how dirty. ;3")
 			fmt.Printf("Error: %s", err.Error())
 			return
 		}
@@ -298,9 +298,9 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	case "Register":
 		fmt.Println("REG.")
 		REG := REG{}
-		if err = xml.Unmarshal(body, &REG); os.IsExist(err) {
+		if err = xml.Unmarshal(body, &REG); err != nil {
 			fmt.Println("...or not. Bad or incomplete request. (End processing.)")
-			fmt.Fprint(w, "disgustingly invalid. ;)")
+			fmt.Fprint(w, "disgustingly invalid. ;3")
 			fmt.Printf("Error: %s", err.Error())
 			return
 		}
@@ -331,9 +331,9 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	case "Unregister":
 		fmt.Println("UNR.")
 		UNR := UNR{}
-		if err = xml.Unmarshal(body, &UNR); os.IsExist(err) {
+		if err = xml.Unmarshal(body, &UNR); err != nil {
 			fmt.Println("...or not. Bad or incomplete request. (End processing.)")
-			fmt.Fprint(w, "how abnormal... ;)")
+			fmt.Fprint(w, "how abnormal... ;3")
 			fmt.Printf("Error: %s", err.Error())
 			return
 		}

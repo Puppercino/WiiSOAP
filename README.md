@@ -7,6 +7,12 @@ This is the SOAP Server Software. The other repository only has the communicatio
 # Changelog
 Versions on this software are based on goals. (e.g 0.2 works towards SQL support. 0.3 works towards NUS support, etc.)
 ## 0.2.x Kawauso
+### 0.2.6
+*This version of WiiSOAP Server was brought to you by Apfel. Thank you for your contribution.*
+- Fixed error handling.
+- Moved configuration example.
+- Added `go.mod` for an easier installation.
+- Changed `SQLPort` to `SQLAddress` in the `config.xml` file.
 ### 0.2.5
 *This version of WiiSOAP Server was brought to you by Apfel. Thank you for your contribution.*
 - Fixed lint errors.
