@@ -2,7 +2,7 @@
     <Address>127.0.0.1:8080</Address>
 
     <SQLAddress>127.0.0.1:3306</SQLAddress>
-    <SQLUser>uwu</SQLUser>
-    <SQLPass>owo</SQLPass>
+    <SQLUser>username-here</SQLUser>
+    <SQLPass>password-here</SQLPass>
     <SQLDB>wiisoap</SQLDB>
 </Config>
