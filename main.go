@@ -47,7 +47,7 @@ func checkError(err error) {
 
 func main() {
 	// Initial Start.
-	fmt.Println("WiiSOAP 0.2.6 Kawauso\nReading the Config...")
+	fmt.Println("WiiSOAP 0.2.6 Kawauso\n[i] Reading the Config...")
 
 	// Check the Config.
 	configfile, err := os.Open("./config.xml")
@@ -56,13 +56,14 @@ func main() {
 	checkError(err)
 	CON := Config{}
 	err = xml.Unmarshal([]byte(ioconfig), &CON)
-	fmt.Println(CON)
+	//fmt.Println(CON)
+	// ^ Printing this shows the password in the commandline, which may be insecure. ^
 	checkError(err)
 
-	fmt.Println("Initializing core...")
+	fmt.Println("[i] Initializing core...")
 
 	// Start SQL.
-	db, err := sql.Open("mysql", fmt.Sprintf("%s:%s@tcp(%s)/%s)", CON.SQLUser, CON.SQLPass, CON.SQLAddress, CON.SQLDB))
+	db, err := sql.Open("mysql", fmt.Sprintf("%s:%s@tcp(%s)/%s", CON.SQLUser, CON.SQLPass, CON.SQLAddress, CON.SQLDB))
 	checkError(err)
 
 	// Close SQL after everything else is done.
@@ -83,16 +84,17 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	timestampnano := strconv.FormatInt(time.Now().UTC().Unix(), 10)
 	timestamp := timestampnano + "000"
 
-	fmt.Println("-=Incoming request!=-")
+	fmt.Println("[!] Incoming request.")
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
-		http.Error(w, "Error reading request body...", http.StatusInternalServerError)
+		http.Error(w, "[x] Error reading request body...", http.StatusInternalServerError)
 	}
 
 	// The switch converts the HTTP Body of the request into a string. There is no need to convert the cases to byte format.
 	switch string(body) {
 	// TODO: Make the case functions cleaner. (e.g. Should the response be a variable?)
 	// TODO: Update the responses so that they query the SQL Database for the proper information (e.g. Device Code, Token, etc).
+	// TODO: Use Strings.Contains otherwise the program assumes that the whole request MUST only be the keyword.
 
 	case "CheckDeviceStatus":
 		fmt.Println("CDS.")
@@ -257,7 +259,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 </CheckRegistrationResponse>
 </soapenv:Body>
 </soapenv:Envelope>`, CR.Version, CR.DeviceID, CR.DeviceID, timestamp, CR.SerialNo)
-		fmt.Println("Delivered response!")
+		fmt.Println("[i] Delivered response!")
 
 	case "GetRegistrationInfo":
 		fmt.Println("GRI.")
@@ -359,5 +361,5 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// TODO: Add NUS and CAS SOAP to the case list.
-	fmt.Println("-=End of Request.=-" + "\n")
+	fmt.Println("[!] End of Request." + "\n")
 }
