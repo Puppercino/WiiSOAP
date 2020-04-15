@@ -1,5 +1,5 @@
 # WiiSOAP
-A SOAP Server, designed specifically to handle Wii Shop Channel SOAP.
+A SOAP Server, designed specifically to handle Wii Shop Channel SOAP. Slowly in development.
 
 ## What's the difference between this repo and that other SOAP repo?
 This is the SOAP Server Software. The other repository only has the communication templates between a Wii and WSC's server.
