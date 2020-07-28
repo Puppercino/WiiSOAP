@@ -1,8 +1,4 @@
-package main
-
-import "encoding/xml"
-
-//	Copyright (C) 2018-2019  CornierKhan1
+//	Copyright (C) 2018-2020 CornierKhan1
 //
 //	WiiSOAP is SOAP Server Software, designed specifically to handle Wii Shop Channel SOAP.
 //
@@ -18,6 +14,10 @@ import "encoding/xml"
 //
 //    You should have received a copy of the GNU Affero General Public License
 //    along with this program.  If not, see http://www.gnu.org/licenses/.
+
+package main
+
+import "encoding/xml"
 
 /////////////////////
 // SOAP STRUCTURES //

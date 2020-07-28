@@ -1,4 +1,4 @@
-//	Copyright (C) 2018-2019  CornierKhan1
+//	Copyright (C) 2018-2020 CornierKhan1
 //
 //	WiiSOAP is SOAP Server Software, designed specifically to handle Wii Shop Channel SOAP.
 //
