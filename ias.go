@@ -22,18 +22,12 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
-	"strconv"
-	"time"
 )
 
 func iasHandler(w http.ResponseWriter, r *http.Request) {
 	// Figure out the action to handle via header.
 	action := r.Header.Get("SOAPAction")
 	action = parseAction(action, "ias")
-
-	// Get a sexy new timestamp to use.
-	timestampNano := strconv.FormatInt(time.Now().UTC().Unix(), 10)
-	timestamp := timestampNano + "000"
 
 	fmt.Println("[!] Incoming IAS request.")
 	body, err := ioutil.ReadAll(r.Body)
@@ -57,23 +51,9 @@ func iasHandler(w http.ResponseWriter, r *http.Request) {
 		}
 		fmt.Println(CR)
 		fmt.Println("The request is valid! Responding...")
-		fmt.Fprintf(w, `<?xml version="1.0" encoding="utf-8"?>
-<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" 
-		xmlns:xsd="http://www.w3.org/2001/XMLSchema" 
-		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-<soapenv:Body>
-<CheckRegistrationResponse xmlns="urn:ias.wsapi.broadon.com">
-	<Version>%s</Version>
-	<DeviceId>%s</DeviceId>
-	<MessageId>%s</MessageId>
-	<TimeStamp>%s</TimeStamp>
-	<ErrorCode>0</ErrorCode>
-	<ServiceStandbyMode>false</ServiceStandbyMode>
-	<OriginalSerialNumber>%s</OriginalSerialNumber>
-	<DeviceStatus>R</DeviceStatus>
-</CheckRegistrationResponse>
-</soapenv:Body>
-</soapenv:Envelope>`, CR.Version, CR.DeviceID, CR.DeviceID, timestamp, CR.SerialNo)
+		custom := fmt.Sprintf(`<OriginalSerialNumber>%s</OriginalSerialNumber>
+			<DeviceStatus>R</DeviceStatus>`, CR.SerialNo)
+		fmt.Fprint(w, formatSuccess("ias", action, CR.Version, CR.DeviceID, CR.MessageID, custom))
 
 	case "GetRegistrationInfo":
 		fmt.Println("GRI.")
@@ -86,29 +66,15 @@ func iasHandler(w http.ResponseWriter, r *http.Request) {
 		}
 		fmt.Println(GRI)
 		fmt.Println("The request is valid! Responding...")
-		fmt.Fprintf(w, `<?xml version="1.0" encoding="utf-8"?>
-<soapenv:Envelope   xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" 
-		xmlns:xsd="http://www.w3.org/2001/XMLSchema" 
-		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-	<soapenv:Body>
-		<GetRegistrationInfoResponse xmlns="urn:ias.wsapi.broadon.com">
-			<Version>%s</Version>
-			<DeviceId>%s</DeviceId>
-			<MessageId>%s</MessageId>
-			<TimeStamp>%s</TimeStamp>
-			<ErrorCode>0</ErrorCode>
-			<ServiceStandbyMode>false</ServiceStandbyMode>
-			<AccountId>%s</AccountId>
+		custom := fmt.Sprintf(`<AccountId>%s</AccountId>
 			<DeviceToken>00000000</DeviceToken>
 			<DeviceTokenExpired>false</DeviceTokenExpired>
 			<Country>%s</Country>
 			<ExtAccountId></ExtAccountId>
 			<DeviceCode>0000000000000000</DeviceCode>
 			<DeviceStatus>R</DeviceStatus>
-			<Currency>POINTS</Currency>
-		</GetRegistrationInfoResponse>
-	</soapenv:Body>
-</soapenv:Envelope>`, GRI.Version, GRI.DeviceID, GRI.MessageID, timestamp, GRI.AccountID, GRI.Country)
+			<Currency>POINTS</Currency>`, GRI.AccountID, GRI.Country)
+		fmt.Fprint(w, formatSuccess("ias", action, GRI.Version, GRI.DeviceID, GRI.MessageID, custom))
 
 	case "Register":
 		fmt.Println("REG.")
@@ -121,26 +87,12 @@ func iasHandler(w http.ResponseWriter, r *http.Request) {
 		}
 		fmt.Println(REG)
 		fmt.Println("The request is valid! Responding...")
-		fmt.Fprintf(w, `<?xml version="1.0" encoding="utf-8"?>
-<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" 
-		xmlns:xsd="http://www.w3.org/2001/XMLSchema" 
-		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-	<soapenv:Body>
-		<RegisterResponse xmlns="urn:ias.wsapi.broadon.com">
-			<Version>%s</Version>
-			<DeviceId>%s</DeviceId>
-			<MessageId>%s</MessageId>
-			<TimeStamp>%s</TimeStamp>
-			<ErrorCode>0</ErrorCode>
-			<ServiceStandbyMode>false</ServiceStandbyMode>
-			<AccountId>%s</AccountId>
+		custom := fmt.Sprintf(`<AccountId>%s</AccountId>
 			<DeviceToken>00000000</DeviceToken>
 			<Country>%s</Country>
 			<ExtAccountId></ExtAccountId>
-			<DeviceCode>00000000</DeviceCode>
-		</RegisterResponse>
-	</soapenv:Body>
-</soapenv:Envelope>`, REG.Version, REG.DeviceID, REG.MessageID, timestamp, REG.AccountID, REG.Country)
+			<DeviceCode>00000000</DeviceCode>`, REG.AccountID, REG.Country)
+		fmt.Fprint(w, formatSuccess("ias", action, REG.Version, REG.DeviceID, REG.MessageID, custom))
 
 	case "Unregister":
 		fmt.Println("UNR.")
@@ -153,22 +105,10 @@ func iasHandler(w http.ResponseWriter, r *http.Request) {
 		}
 		fmt.Println(UNR)
 		fmt.Println("The request is valid! Responding...")
-		fmt.Fprintf(w, `<?xml version="1.0" encoding="utf-8"?>
-<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-	<soapenv:Body>
-		<UnregisterResponse xmlns="urn:ias.wsapi.broadon.com">
-			<Version>%s</Version>
-			<DeviceId>%s</DeviceId>
-			<MessageId>%s</MessageId>
-			<TimeStamp>%s</TimeStamp>
-			<ErrorCode>0</ErrorCode>
-		<ServiceStandbyMode>false</ServiceStandbyMode>
-		</UnregisterResponse>
-	</soapenv:Body>
-</soapenv:Envelope>`, UNR.Version, UNR.DeviceID, UNR.MessageID, timestamp)
+		fmt.Fprint(w, formatSuccess("ias", action, UNR.Version, UNR.DeviceID, UNR.MessageID, ""))
 
 	default:
-		fmt.Fprintf(w, "WiiSOAP can't handle this. Try again later or actually use a Wii instead of a computer.")
+		fmt.Fprint(w, "WiiSOAP can't handle this. Try again later or actually use a Wii instead of a computer.")
 		return
 	}
 

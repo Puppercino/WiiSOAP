@@ -56,28 +56,14 @@ func ecsHandler(w http.ResponseWriter, r *http.Request) {
 		}
 		fmt.Println(CDS)
 		fmt.Println("The request is valid! Responding...")
-		fmt.Fprintf(w, `<?xml version="1.0" encoding="utf-8"?>
-<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" 
-	  	xmlns:xsd="http://www.w3.org/2001/XMLSchema" 
-	  	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-	<soapenv:Body>
-		<CheckDeviceStatusResponse xmlns="urn:ecs.wsapi.broadon.com">
-			<Version>%s</Version>
-			<DeviceId>%s</DeviceId>
-			<MessageId>%s</MessageId>
-			<TimeStamp>%s</TimeStamp>
-			<ErrorCode>0</ErrorCode>
-			<ServiceStandbyMode>false</ServiceStandbyMode>
-			<Balance>
+		custom := fmt.Sprintf(`<Balance>
 				<Amount>2018</Amount>
 				<Currency>POINTS</Currency>
 			</Balance>
 			<ForceSyncTime>0</ForceSyncTime>
 			<ExtTicketTime>%s</ExtTicketTime>
-			<SyncTime>%s</SyncTime>
-		</CheckDeviceStatusResponse>
-	</soapenv:Body>
-</soapenv:Envelope>`, CDS.Version, CDS.DeviceID, CDS.MessageID, timestamp, timestamp, timestamp)
+			<SyncTime>%s</SyncTime>`, timestamp, timestamp)
+		fmt.Fprint(w, formatSuccess("ecs", action, CDS.Version, CDS.DeviceID, CDS.MessageID, custom))
 
 	case "NotifiedETicketsSynced":
 		fmt.Println("NETS")
@@ -90,21 +76,7 @@ func ecsHandler(w http.ResponseWriter, r *http.Request) {
 		}
 		fmt.Println(NETS)
 		fmt.Println("The request is valid! Responding...")
-		fmt.Fprintf(w, `<?xml version="1.0" encoding="utf-8"?>
-<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" 
-			xmlns:xsd="http://www.w3.org/2001/XMLSchema" 
-			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-		<soapenv:Body>
-			<NotifyETicketsSyncedResponse xmlns="urn:ecs.wsapi.broadon.com">
-				<Version>%s</Version>
-				<DeviceId>%s</DeviceId>
-				<MessageId>%s</MessageId>
-				<TimeStamp>%s</TimeStamp>
-				<ErrorCode>0</ErrorCode>
-				<ServiceStandbyMode>false</ServiceStandbyMode>
-			</NotifyETicketsSyncedResponse>
-	</soapenv:Body>
-</soapenv:Envelope>`, NETS.Version, NETS.DeviceID, NETS.MessageID, timestamp)
+		fmt.Fprint(w, formatSuccess("ecs", action, NETS.Version, NETS.DeviceID, NETS.MessageID, ""))
 
 	case "ListETickets":
 		fmt.Println("LET")
@@ -117,24 +89,10 @@ func ecsHandler(w http.ResponseWriter, r *http.Request) {
 		}
 		fmt.Println(LET)
 		fmt.Println("The request is valid! Responding...")
-		fmt.Fprintf(w, `<?xml version="1.0" encoding="utf-8"?>
-<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" 
-		xmlns:xsd="http://www.w3.org/2001/XMLSchema" 
-		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-	<soapenv:Body>
-		<ListETicketsResponse xmlns="urn:ecs.wsapi.broadon.com">
-			<Version>%s</Version>
-			<DeviceId>%s</DeviceId>
-			<MessageId>%s</MessageId>
-			<TimeStamp>%s</TimeStamp>
-			<ErrorCode>0</ErrorCode>
-			<ServiceStandbyMode>false</ServiceStandbyMode>
-			<ForceSyncTime>0</ForceSyncTime>
+		custom := fmt.Sprintf(`<ForceSyncTime>0</ForceSyncTime>
 			<ExtTicketTime>%s</ExtTicketTime>
-			<SyncTime>%s</SyncTime>
-		</ListETicketsResponse>
-	</soapenv:Body>
-</soapenv:Envelope>`, LET.Version, LET.DeviceID, LET.MessageID, timestamp, timestamp, timestamp)
+			<SyncTime>%s</SyncTime>`, timestamp, timestamp)
+		fmt.Fprint(w, formatSuccess("ecs", action, LET.Version, LET.DeviceID, LET.MessageID, custom))
 
 	case "PurchaseTitle":
 		fmt.Println("PT")
@@ -147,19 +105,7 @@ func ecsHandler(w http.ResponseWriter, r *http.Request) {
 		}
 		fmt.Println(PT)
 		fmt.Println("The request is valid! Responding...")
-		fmt.Fprintf(w, `<?xml version="1.0" encoding="utf-8"?>
-<soapenv:Envelope	xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" 
-		xmlns:xsd="http://www.w3.org/2001/XMLSchema" 
-		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-	<soapenv:Body>
-		<PurchaseTitleResponse xmlns="urn:ecs.wsapi.broadon.com">
-			<Version>%s</Version>
-			<DeviceId>%s</DeviceId>
-			<MessageId>%s</MessageId>
-			<TimeStamp>%s</TimeStamp>
-			<ErrorCode>0</ErrorCode>
-			<ServiceStandbyMode>false</ServiceStandbyMode>
-			<Balance>
+		custom := fmt.Sprintf(`<Balance>
 				<Amount>2018</Amount>
 				<Currency>POINTS</Currency>
 			</Balance>
@@ -172,13 +118,11 @@ func ecsHandler(w http.ResponseWriter, r *http.Request) {
 			<ETickets>00000000</ETickets>
 			<Certs>00000000</Certs>
 			<Certs>00000000</Certs>
-			<TitleId>00000000</TitleId>
-		</PurchaseTitleResponse>
-	</soapenv:Body>
-</soapenv:Envelope>`, PT.Version, PT.DeviceID, PT.MessageID, timestamp, timestamp, timestamp)
+			<TitleId>00000000</TitleId>`, timestamp, timestamp)
+		fmt.Fprint(w, formatSuccess("ecs", action, PT.Version, PT.DeviceID, PT.MessageID, custom))
 
 	default:
-		fmt.Fprintf(w, "WiiSOAP can't handle this. Try again later or actually use a Wii instead of a computer.")
+		fmt.Fprint(w, "WiiSOAP can't handle this. Try again later or actually use a Wii instead of a computer.")
 		return
 	}
 

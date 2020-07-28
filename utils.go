@@ -17,13 +17,19 @@
 
 package main
 
-import "strings"
+import (
+	"fmt"
+	"strconv"
+	"strings"
+	"time"
+)
 
+// namespaceForType returns the expected XML namespace format for a service.
 func namespaceForType(service string) string {
 	return "urn:" + service + ".wsapi.broadon.com"
 }
 
-// Expected contents are along the lines of "urn:ecs.wsapi.broadon.com/CheckDeviceStatus"
+// parseAction interprets contents along the lines of "urn:ecs.wsapi.broadon.com/CheckDeviceStatus".
 func parseAction(original string, service string) string {
 	prefix := namespaceForType(service) + "/"
 	stripped := strings.Replace(original, prefix, "", 1)
@@ -34,4 +40,43 @@ func parseAction(original string, service string) string {
 	} else {
 		return stripped
 	}
+}
+
+// formatHeader formats a response type and the proper service.
+func formatHeader(responseType string, service string) string {
+	return fmt.Sprintf(Header, responseType, namespaceForType(service))
+}
+
+// formatTemplate inserts common, cross-requests values into every request.
+func formatTemplate(version string, deviceId string, messageId string, errorCode int) string {
+	// Get a sexy new timestamp to use.
+	timestampNano := strconv.FormatInt(time.Now().UTC().Unix(), 10)
+	timestamp := timestampNano + "000"
+
+	return fmt.Sprintf(Template, version, deviceId, messageId, timestamp, errorCode)
+}
+
+// formatFooter formats the closing tags of any SOAP request per previous response type.
+func formatFooter(responseType string) string {
+	return fmt.Sprintf(Footer, responseType)
+}
+
+// formatForNamespace mangles together several variables throughout a SOAP request.
+func formatForNamespace(service string, responseType string, version string, deviceId string, messageId string, errorCode int, extraContents string) string {
+	return fmt.Sprintf("%s%s%s%s",
+		formatHeader(responseType, service),
+		formatTemplate(version, deviceId, messageId, errorCode),
+		"\t\t"+extraContents,
+		formatFooter(responseType),
+	)
+}
+
+// formatSuccess returns a standard SOAP response with a positive error code, and additional contents.
+func formatSuccess(service string, responseType string, version string, deviceId string, messageId string, extraContents string) string {
+	return formatForNamespace(service, responseType, version, deviceId, messageId, 0, extraContents)
+}
+
+// formatError returns a standard SOAP response with an error code.
+func formatError(service string, responseType string, version string, deviceId string, messageId string, errorCode int) string {
+	return formatForNamespace(service, responseType, version, deviceId, messageId, errorCode, "")
 }
