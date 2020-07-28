@@ -24,8 +24,8 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
-	"os"
 	"strconv"
+	"strings"
 	"time"
 
 	_ "github.com/go-sql-driver/mysql"
@@ -50,14 +50,10 @@ func main() {
 	fmt.Println("WiiSOAP 0.2.6 Kawauso\n[i] Reading the Config...")
 
 	// Check the Config.
-	configfile, err := os.Open("./config.xml")
-	checkError(err)
-	ioconfig, err := ioutil.ReadAll(configfile)
+	ioconfig, err := ioutil.ReadFile("./config.xml")
 	checkError(err)
 	CON := Config{}
-	err = xml.Unmarshal([]byte(ioconfig), &CON)
-	//fmt.Println(CON)
-	// ^ Printing this shows the password in the commandline, which may be insecure. ^
+	err = xml.Unmarshal(ioconfig, &CON)
 	checkError(err)
 
 	fmt.Println("[i] Initializing core...")
@@ -73,13 +69,17 @@ func main() {
 
 	// Start the HTTP server.
 	fmt.Printf("Starting HTTP connection (%s)...\nNot using the usual port for HTTP?\nBe sure to use a proxy, otherwise the Wii can't connect!\n", CON.Address)
-	http.HandleFunc("/", handler) // each request calls handler
+	http.HandleFunc("/ecs/services/ECommerceSOAP", handler) // each request calls handler
 	log.Fatal(http.ListenAndServe(CON.Address, nil))
 
 	// From here on out, all special cool things should go into the handler function.
 }
 
 func handler(w http.ResponseWriter, r *http.Request) {
+	// Figure out the action to handle via header.
+	action := r.Header.Get("SOAPAction")
+	action = parseAction(action, "ecs")
+
 	// Get a sexy new timestamp to use.
 	timestampnano := strconv.FormatInt(time.Now().UTC().Unix(), 10)
 	timestamp := timestampnano + "000"
@@ -87,14 +87,13 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("[!] Incoming request.")
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
-		http.Error(w, "[x] Error reading request body...", http.StatusInternalServerError)
+		http.Error(w, "Error reading request body...", http.StatusInternalServerError)
 	}
 
 	// The switch converts the HTTP Body of the request into a string. There is no need to convert the cases to byte format.
-	switch string(body) {
+	switch action {
 	// TODO: Make the case functions cleaner. (e.g. Should the response be a variable?)
 	// TODO: Update the responses so that they query the SQL Database for the proper information (e.g. Device Code, Token, etc).
-	// TODO: Use Strings.Contains otherwise the program assumes that the whole request MUST only be the keyword.
 
 	case "CheckDeviceStatus":
 		fmt.Println("CDS.")
@@ -362,4 +361,21 @@ func handler(w http.ResponseWriter, r *http.Request) {
 
 	// TODO: Add NUS and CAS SOAP to the case list.
 	fmt.Println("[!] End of Request." + "\n")
+}
+
+func namespaceForType(service string) string {
+	return "urn:" + service + ".wsapi.broadon.com"
+}
+
+// Expected contents are along the lines of "urn:ecs.wsapi.broadon.com/CheckDeviceStatus"
+func parseAction(original string, service string) string {
+	prefix := namespaceForType(service) + "/"
+	stripped := strings.Replace(original, prefix, "", 1)
+
+	if stripped == original {
+		// This doesn't appear valid.
+		return ""
+	} else {
+		return stripped
+	}
 }
