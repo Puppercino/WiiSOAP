@@ -21,11 +21,11 @@ import (
 	"database/sql"
 	"encoding/xml"
 	"fmt"
+	_ "github.com/go-sql-driver/mysql"
 	"io/ioutil"
 	"log"
 	"net/http"
-
-	_ "github.com/go-sql-driver/mysql"
+	"strings"
 )
 
 const (
@@ -45,7 +45,7 @@ const (
 	<ErrorCode>%d</ErrorCode>
 	<ServiceStandbyMode>false</ServiceStandbyMode>` + "\n"
 	// Footer is the base format of a closing envelope in SOAP.
-	Footer = `	</%sResponse>
+	Footer = `</%sResponse>
 </soapenv:Body>
 </soapenv:Envelope>`
 )
@@ -84,9 +84,76 @@ func main() {
 
 	// These following endpoints don't have to match what the official WSC have.
 	// However, semantically, it feels proper.
-	http.HandleFunc("/ecs/services/ECommerceSOAP", ecsHandler)              // For ECS operations
-	http.HandleFunc("/ias/services/IdentityAuthenticationSOAP", iasHandler) // For IAS operations
+	http.HandleFunc("/ecs/services/ECommerceSOAP", commonHandler)
+	http.HandleFunc("/ias/services/IdentityAuthenticationSOAP", commonHandler)
 	log.Fatal(http.ListenAndServe(CON.Address, nil))
 
 	// From here on out, all special cool things should go into their respective handler function.
+}
+
+func commonHandler(w http.ResponseWriter, r *http.Request) {
+	// Figure out the action to handle via header.
+	service, action := parseAction(r.Header.Get("SOAPAction"))
+	if service == "" || action == "" {
+		printError(w, "Error interpreting request...")
+		return
+	}
+
+	// Verify this is a service type we know.
+	switch service {
+	case "ecs":
+	case "ias":
+		break
+	default:
+		printError(w, "Unsupported service type...")
+		return
+	}
+
+	fmt.Println("[!] Incoming " + strings.ToUpper(service) + " request - handling for " + action)
+	body, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		printError(w, "Error reading request body...")
+		return
+	}
+
+	// Tidy up parsed document for easier usage going forward.
+	doc, err := normalise(service, action, strings.NewReader(string(body)))
+	if err != nil {
+		printError(w, "Error interpreting request body: "+err.Error())
+		return
+	}
+
+	// Extract shared values from this request.
+	common, err := obtainCommon(doc)
+	if err != nil {
+		printError(w, "Error handling request body: "+err.Error())
+		return
+	}
+
+	// Insert the current action being performed.
+	common["Service"] = service
+	common["Action"] = action
+
+	var result string
+	var successful bool
+	if service == "ias" {
+		successful, result = iasHandler(common, doc)
+	} else if service == "ecs" {
+		successful, result = ecsHandler(common, doc)
+	}
+
+	if successful {
+		// Write returned with proper Content-Type
+		w.Header().Set("Content-Type", "text/xml; charset=utf-8")
+		w.Write([]byte(result))
+	} else {
+		printError(w, result)
+	}
+
+	fmt.Println("[!] End of " + strings.ToUpper(service) + " Request.\n")
+}
+
+func printError(w http.ResponseWriter, reason string) {
+	http.Error(w, reason, http.StatusInternalServerError)
+	log.Println("Failed to handle request: " + reason)
 }

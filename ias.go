@@ -18,53 +18,39 @@
 package main
 
 import (
-	"encoding/xml"
 	"fmt"
-	"io/ioutil"
-	"net/http"
+	"github.com/antchfx/xmlquery"
 )
 
-func iasHandler(w http.ResponseWriter, r *http.Request) {
-	// Figure out the action to handle via header.
-	action := r.Header.Get("SOAPAction")
-	action = parseAction(action, "ias")
+func iasHandler(common map[string]string, doc *xmlquery.Node) (bool, string) {
 
-	fmt.Println("[!] Incoming IAS request.")
-	body, err := ioutil.ReadAll(r.Body)
-	if err != nil {
-		http.Error(w, "Error reading request body...", http.StatusInternalServerError)
-	}
-
-	// The switch converts the HTTP Body of the request into a string. There is no need to convert the cases to byte format.
-	switch action {
+	// All actions below are for IAS-related functions.
+	switch common["Action"] {
 	// TODO: Make the case functions cleaner. (e.g. Should the response be a variable?)
 	// TODO: Update the responses so that they query the SQL Database for the proper information (e.g. Device Code, Token, etc).
 
 	case "CheckRegistration":
-		fmt.Println("CR.")
-		CR := CR{}
-		if err = xml.Unmarshal(body, &CR); err != nil {
-			fmt.Println("...or not. Bad or incomplete request. (End processing.)")
-			fmt.Fprint(w, "not good enough for me. ;3")
-			fmt.Printf("Error: %v", err)
-			return
+		serialNo, err := getKey(doc, "SerialNumber")
+		if err != nil {
+			return formatError(common, 5, "not good enough for me. ;3", err)
 		}
-		fmt.Println(CR)
+
 		fmt.Println("The request is valid! Responding...")
 		custom := fmt.Sprintf(`<OriginalSerialNumber>%s</OriginalSerialNumber>
-			<DeviceStatus>R</DeviceStatus>`, CR.SerialNo)
-		fmt.Fprint(w, formatSuccess("ias", action, CR.Version, CR.DeviceID, CR.MessageID, custom))
+			<DeviceStatus>R</DeviceStatus>`, serialNo)
+		return formatSuccess(common, custom)
 
 	case "GetRegistrationInfo":
-		fmt.Println("GRI.")
-		GRI := GRI{}
-		if err = xml.Unmarshal(body, &GRI); err != nil {
-			fmt.Println("...or not. Bad or incomplete request. (End processing.)")
-			fmt.Fprint(w, "how dirty. ;3")
-			fmt.Printf("Error: %v", err)
-			return
+		accountId, err := getKey(doc, "AccountId")
+		if err != nil {
+			return formatError(common, 6, "how dirty. ;3", err)
 		}
-		fmt.Println(GRI)
+
+		country, err := getKey(doc, "Country")
+		if err != nil {
+			return formatError(common, 6, "how dirty. ;3", err)
+		}
+
 		fmt.Println("The request is valid! Responding...")
 		custom := fmt.Sprintf(`<AccountId>%s</AccountId>
 			<DeviceToken>00000000</DeviceToken>
@@ -73,47 +59,35 @@ func iasHandler(w http.ResponseWriter, r *http.Request) {
 			<ExtAccountId></ExtAccountId>
 			<DeviceCode>0000000000000000</DeviceCode>
 			<DeviceStatus>R</DeviceStatus>
-			<Currency>POINTS</Currency>`, GRI.AccountID, GRI.Country)
-		fmt.Fprint(w, formatSuccess("ias", action, GRI.Version, GRI.DeviceID, GRI.MessageID, custom))
+			<Currency>POINTS</Currency>`, accountId, country)
+		return formatSuccess(common, custom)
 
 	case "Register":
-		fmt.Println("REG.")
-		REG := REG{}
-		if err = xml.Unmarshal(body, &REG); err != nil {
-			fmt.Println("...or not. Bad or incomplete request. (End processing.)")
-			fmt.Fprint(w, "disgustingly invalid. ;3")
-			fmt.Printf("Error: %v", err)
-			return
+		accountId, err := getKey(doc, "AccountId")
+		if err != nil {
+			return formatError(common, 7, "disgustingly invalid. ;3", err)
 		}
-		fmt.Println(REG)
+
+		country, err := getKey(doc, "Country")
+		if err != nil {
+			return formatError(common, 7, "disgustingly invalid. ;3", err)
+		}
+
 		fmt.Println("The request is valid! Responding...")
 		custom := fmt.Sprintf(`<AccountId>%s</AccountId>
 			<DeviceToken>00000000</DeviceToken>
 			<Country>%s</Country>
 			<ExtAccountId></ExtAccountId>
-			<DeviceCode>00000000</DeviceCode>`, REG.AccountID, REG.Country)
-		fmt.Fprint(w, formatSuccess("ias", action, REG.Version, REG.DeviceID, REG.MessageID, custom))
+			<DeviceCode>00000000</DeviceCode>`, accountId, country)
+		return formatSuccess(common, custom)
 
 	case "Unregister":
-		fmt.Println("UNR.")
-		UNR := UNR{}
-		if err = xml.Unmarshal(body, &UNR); err != nil {
-			fmt.Println("...or not. Bad or incomplete request. (End processing.)")
-			fmt.Fprint(w, "how abnormal... ;3")
-			fmt.Printf("Error: %v", err)
-			return
-		}
-		fmt.Println(UNR)
+		// how abnormal... ;3
+
 		fmt.Println("The request is valid! Responding...")
-		fmt.Fprint(w, formatSuccess("ias", action, UNR.Version, UNR.DeviceID, UNR.MessageID, ""))
+		return formatSuccess(common, "")
 
 	default:
-		fmt.Fprint(w, "WiiSOAP can't handle this. Try again later or actually use a Wii instead of a computer.")
-		return
+		return false, "WiiSOAP can't handle this. Try again later or actually use a Wii instead of a computer."
 	}
-
-	fmt.Println("Delivered response!")
-
-	// TODO: Add NUS and CAS SOAP to the case list.
-	fmt.Println("[!] End of IAS Request.\n")
 }
