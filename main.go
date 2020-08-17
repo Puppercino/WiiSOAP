@@ -95,7 +95,7 @@ func commonHandler(w http.ResponseWriter, r *http.Request) {
 	// Figure out the action to handle via header.
 	service, action := parseAction(r.Header.Get("SOAPAction"))
 	if service == "" || action == "" {
-		printError(w, "Error interpreting request...")
+		printError(w, "WiiSOAP can't handle this. Try again later or actually use a Wii instead of a computer.")
 		return
 	}
 
