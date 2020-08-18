@@ -22,11 +22,9 @@ import (
 	"github.com/antchfx/xmlquery"
 )
 
-func ecsHandler(common map[string]string, doc *xmlquery.Node) (bool, string) {
-	timestamp := common["Timestamp"]
-
+func ecsHandler(e Envelope, doc *xmlquery.Node) (bool, string) {
 	// All actions below are for ECS-related functions.
-	switch common["Action"] {
+	switch e.Action() {
 	// TODO: Make the case functions cleaner. (e.g. Should the response be a variable?)
 	// TODO: Update the responses so that they query the SQL Database for the proper information (e.g. Device Code, Token, etc).
 
@@ -34,51 +32,52 @@ func ecsHandler(common map[string]string, doc *xmlquery.Node) (bool, string) {
 		//You need to POST some SOAP from WSC if you wanna get some, honey. ;3
 
 		fmt.Println("The request is valid! Responding...")
-		custom := fmt.Sprintf(`<Balance>
-				<Amount>2018</Amount>
-				<Currency>POINTS</Currency>
-			</Balance>
-			<ForceSyncTime>0</ForceSyncTime>
-			<ExtTicketTime>%s</ExtTicketTime>
-			<SyncTime>%s</SyncTime>`, timestamp, timestamp)
-		return formatSuccess(common, custom)
+		e.AddCustomType(Balance{
+			Amount:   2018,
+			Currency: "POINTS",
+		})
+		e.AddKVNode("ForceSyncTime", "0")
+		e.AddKVNode("ExtTicketTime", e.Timestamp())
+		e.AddKVNode("SyncTime", e.Timestamp())
+		break
 
 	case "NotifyETicketsSynced":
 		// This is a disgusting request, but 20 dollars is 20 dollars. ;3
 
 		fmt.Println("The request is valid! Responding...")
-		return formatSuccess(common, "")
+		break
 
 	case "ListETickets":
 		// that's all you've got for me? ;3
 
 		fmt.Println("The request is valid! Responding...")
-		custom := fmt.Sprintf(`<ForceSyncTime>0</ForceSyncTime>
-			<ExtTicketTime>%s</ExtTicketTime>
-			<SyncTime>%s</SyncTime>`, timestamp, timestamp)
-		return formatSuccess(common, custom)
+		e.AddKVNode("ForceSyncTime", "0")
+		e.AddKVNode("ExtTicketTime", e.Timestamp())
+		e.AddKVNode("SyncTime", e.Timestamp())
+		break
 
 	case "PurchaseTitle":
 		// If you wanna fun time, it's gonna cost ya extra sweetie... ;3
 
 		fmt.Println("The request is valid! Responding...")
-		custom := fmt.Sprintf(`<Balance>
-				<Amount>2018</Amount>
-				<Currency>POINTS</Currency>
-			</Balance>
-			<Transactions>
-				<TransactionId>00000000</TransactionId>
-				<Date>%s</Date>
-				<Type>PURCHGAME</Type>
-			</Transactions>
-			<SyncTime>%s</SyncTime>
-			<ETickets>00000000</ETickets>
-			<Certs>00000000</Certs>
-			<Certs>00000000</Certs>
-			<TitleId>00000000</TitleId>`, timestamp, timestamp)
-		return formatSuccess(common, custom)
+		e.AddCustomType(Balance{
+			Amount:   2018,
+			Currency: "POINTS",
+		})
+		e.AddCustomType(Transactions{
+			TransactionId: "00000000",
+			Date:          e.Timestamp(),
+			Type:          "PURCHGAME",
+		})
+		e.AddKVNode("SyncTime", e.Timestamp())
+		e.AddKVNode("Certs", "00000000")
+		e.AddKVNode("TitleId", "00000000")
+		e.AddKVNode("ETickets", "00000000")
+		break
 
 	default:
 		return false, "WiiSOAP can't handle this. Try again later or actually use a Wii instead of a computer."
 	}
+
+	return e.ReturnSuccess()
 }

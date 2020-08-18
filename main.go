@@ -28,28 +28,6 @@ import (
 	"strings"
 )
 
-const (
-	// Header is the base format of a SOAP response with string substitutions available.
-	// All XML constants must be treated as temporary until a proper XPath solution is investigated.
-	Header = `<?xml version="1.0" encoding="utf-8"?>
-<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" 
-		xmlns:xsd="http://www.w3.org/2001/XMLSchema" 
-		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-<soapenv:Body>
-<%sResponse xmlns="%s">` + "\n"
-	// Template describes common fields across all requests, for easy replication.
-	Template = `	<Version>%s</Version>
-	<DeviceId>%s</DeviceId>
-	<MessageId>%s</MessageId>
-	<TimeStamp>%s</TimeStamp>
-	<ErrorCode>%d</ErrorCode>
-	<ServiceStandbyMode>false</ServiceStandbyMode>` + "\n"
-	// Footer is the base format of a closing envelope in SOAP.
-	Footer = `</%sResponse>
-</soapenv:Body>
-</soapenv:Envelope>`
-)
-
 // checkError makes error handling not as ugly and inefficient.
 func checkError(err error) {
 	if err != nil {
@@ -123,23 +101,24 @@ func commonHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	fmt.Println("Received:", string(body))
+
+	// Insert the current action being performed.
+	envelope := NewEnvelope(service, action)
+
 	// Extract shared values from this request.
-	common, err := obtainCommon(doc)
+	err = envelope.ObtainCommon(doc)
 	if err != nil {
 		printError(w, "Error handling request body: "+err.Error())
 		return
 	}
 
-	// Insert the current action being performed.
-	common["Service"] = service
-	common["Action"] = action
-
-	var result string
 	var successful bool
+	var result string
 	if service == "ias" {
-		successful, result = iasHandler(common, doc)
+		successful, result = iasHandler(envelope, doc)
 	} else if service == "ecs" {
-		successful, result = ecsHandler(common, doc)
+		successful, result = ecsHandler(envelope, doc)
 	}
 
 	if successful {
@@ -155,5 +134,5 @@ func commonHandler(w http.ResponseWriter, r *http.Request) {
 
 func printError(w http.ResponseWriter, reason string) {
 	http.Error(w, reason, http.StatusInternalServerError)
-	log.Println("Failed to handle request: " + reason)
+	fmt.Println("Failed to handle request: " + reason)
 }

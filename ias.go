@@ -22,72 +22,78 @@ import (
 	"github.com/antchfx/xmlquery"
 )
 
-func iasHandler(common map[string]string, doc *xmlquery.Node) (bool, string) {
+func iasHandler(e Envelope, doc *xmlquery.Node) (bool, string) {
 
 	// All actions below are for IAS-related functions.
-	switch common["Action"] {
+	switch e.Action() {
 	// TODO: Make the case functions cleaner. (e.g. Should the response be a variable?)
 	// TODO: Update the responses so that they query the SQL Database for the proper information (e.g. Device Code, Token, etc).
 
 	case "CheckRegistration":
 		serialNo, err := getKey(doc, "SerialNumber")
 		if err != nil {
-			return formatError(common, 5, "not good enough for me. ;3", err)
+			return e.ReturnError(5, "not good enough for me. ;3", err)
 		}
 
 		fmt.Println("The request is valid! Responding...")
-		custom := fmt.Sprintf(`<OriginalSerialNumber>%s</OriginalSerialNumber>
-			<DeviceStatus>R</DeviceStatus>`, serialNo)
-		return formatSuccess(common, custom)
+		e.AddKVNode("OriginalSerialNumber", serialNo)
+		e.AddKVNode("DeviceStatus", "R")
+		break
+
+	case "GetChallenge":
+		fmt.Println("The request is valid! Responding...")
+		break
 
 	case "GetRegistrationInfo":
 		accountId, err := getKey(doc, "AccountId")
 		if err != nil {
-			return formatError(common, 6, "how dirty. ;3", err)
+			return e.ReturnError(7, "how dirty. ;3", err)
 		}
 
 		country, err := getKey(doc, "Country")
 		if err != nil {
-			return formatError(common, 6, "how dirty. ;3", err)
+			return e.ReturnError(7, "how dirty. ;3", err)
 		}
 
 		fmt.Println("The request is valid! Responding...")
-		custom := fmt.Sprintf(`<AccountId>%s</AccountId>
-			<DeviceToken>00000000</DeviceToken>
-			<DeviceTokenExpired>false</DeviceTokenExpired>
-			<Country>%s</Country>
-			<ExtAccountId></ExtAccountId>
-			<DeviceCode>0000000000000000</DeviceCode>
-			<DeviceStatus>R</DeviceStatus>
-			<Currency>POINTS</Currency>`, accountId, country)
-		return formatSuccess(common, custom)
+		e.AddKVNode("AccountId", accountId)
+		e.AddKVNode("DeviceToken", "00000000")
+		e.AddKVNode("DeviceTokenExpired", "false")
+		e.AddKVNode("Country", country)
+		e.AddKVNode("ExtAccountId", "")
+		e.AddKVNode("DeviceCode", "0000000000000000")
+		e.AddKVNode("DeviceStatus", "R")
+		// This _must_ be POINTS.
+		e.AddKVNode("Currency", "POINTS")
+		break
 
 	case "Register":
 		accountId, err := getKey(doc, "AccountId")
 		if err != nil {
-			return formatError(common, 7, "disgustingly invalid. ;3", err)
+			return e.ReturnError(8, "disgustingly invalid. ;3", err)
 		}
 
 		country, err := getKey(doc, "Country")
 		if err != nil {
-			return formatError(common, 7, "disgustingly invalid. ;3", err)
+			return e.ReturnError(8, "disgustingly invalid. ;3", err)
 		}
 
 		fmt.Println("The request is valid! Responding...")
-		custom := fmt.Sprintf(`<AccountId>%s</AccountId>
-			<DeviceToken>00000000</DeviceToken>
-			<Country>%s</Country>
-			<ExtAccountId></ExtAccountId>
-			<DeviceCode>00000000</DeviceCode>`, accountId, country)
-		return formatSuccess(common, custom)
+		e.AddKVNode("AccountId", accountId)
+		e.AddKVNode("DeviceToken", "00000000")
+		e.AddKVNode("Country", country)
+		e.AddKVNode("ExtAccountId", "")
+		e.AddKVNode("DeviceCode", "0000000000000000")
+		break
 
 	case "Unregister":
 		// how abnormal... ;3
-
 		fmt.Println("The request is valid! Responding...")
-		return formatSuccess(common, "")
+		break
 
 	default:
 		return false, "WiiSOAP can't handle this. Try again later or actually use a Wii instead of a computer."
 	}
+
+	return e.ReturnSuccess()
 }

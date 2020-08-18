@@ -35,3 +35,66 @@ type Config struct {
 	SQLPass    string `xml:"SQLPass"`
 	SQLDB      string `xml:"SQLDB"`
 }
+
+// Envelope represents the root element of any response, soapenv:Envelope.
+type Envelope struct {
+	XMLName string `xml:"soapenv:Envelope"`
+	SOAPEnv string `xml:"xmlns:soapenv,attr"`
+	XSD     string `xml:"xmlns:xsd,attr"`
+	XSI     string `xml:"xmlns:xsi,attr"`
+
+	// Represents a soapenv:Body within.
+	Body Body
+
+	// Used for internal state tracking.
+	action string
+}
+
+// Body represents the nested soapenv:Body element as a child on the root element,
+// containing the response intended for the action being handled.
+type Body struct {
+	XMLName string `xml:"soapenv:Body"`
+
+	// Represents the actual response inside
+	Response Response
+}
+
+// Response describes the inner response format, along with common fields across requests.
+type Response struct {
+	XMLName xml.Name
+	XMLNS   string `xml:"xmlns,attr"`
+
+	// These common fields are persistent across all requests.
+	Version            string `xml:"Version"`
+	DeviceId           string `xml:"DeviceId"`
+	MessageId          string `xml:"MessageId"`
+	TimeStamp          string `xml:"TimeStamp"`
+	ErrorCode          int
+	ServiceStandbyMode bool `xml:"ServiceStandbyMode"`
+
+	// Allows a simple <name>value</name> node to be inserted.
+	KVFields []KVField
+	// Allows for <name>[dynamic content]</name> situations.
+	CustomFields []interface{}
+}
+
+// KVField represents an individual node in form of <XMLName>Contents</XMLName>.
+type KVField struct {
+	XMLName xml.Name
+	Value   string `xml:",chardata"`
+}
+
+// Balance represents a common XML structure.
+type Balance struct {
+	XMLName  xml.Name `xml:"Balance"`
+	Amount   int      `xml:"Amount"`
+	Currency string   `xml"Currency"`
+}
+
+// Transactions represents a common XML structure.
+type Transactions struct {
+	XMLName       xml.Name `xml:"Transactions"`
+	TransactionId string   `xml:"TransactionId"`
+	Date          string   `xml:"Date"`
+	Type          string   `xml:"Type"`
+}

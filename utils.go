@@ -18,8 +18,8 @@
 package main
 
 import (
+	"encoding/xml"
 	"errors"
-	"fmt"
 	"github.com/antchfx/xmlquery"
 	"io"
 	"regexp"
@@ -44,41 +44,104 @@ func parseAction(original string) (string, string) {
 	return service, action
 }
 
-// formatHeader formats a response type and the proper service.
-func formatHeader(responseType string, service string) string {
-	return fmt.Sprintf(Header, responseType, "urn:"+service+".wsapi.broadon.com")
+// NewEnvelope returns a new Envelope with proper attributes initialized.
+func NewEnvelope(service string, action string) Envelope {
+	// Get a sexy new timestamp to use.
+	timestampNano := strconv.FormatInt(time.Now().UTC().Unix(), 10) + "000"
+
+	return Envelope{
+		SOAPEnv: "http://schemas.xmlsoap.org/soap/envelope/",
+		XSD:     "http://www.w3.org/2001/XMLSchema",
+		XSI:     "http://www.w3.org/2001/XMLSchema-instance",
+		Body: Body{
+			Response: Response{
+				XMLName: xml.Name{Local: action + "Response"},
+				XMLNS:   "urn:" + service + ".wsapi.broadon.com",
+
+				TimeStamp: timestampNano,
+			},
+		},
+		action: action,
+	}
 }
 
-// formatTemplate inserts common, cross-requests values into every request.
-func formatTemplate(common map[string]string, errorCode int) string {
-	return fmt.Sprintf(Template, common["Version"], common["DeviceID"], common["MessageId"], common["Timestamp"], errorCode)
+// Action returns the action for this service.
+func (e *Envelope) Action() string {
+	return e.action
 }
 
-// formatFooter formats the closing tags of any SOAP request per previous response type.
-func formatFooter(responseType string) string {
-	return fmt.Sprintf(Footer, responseType)
+// Timestamp returns a shared timestamp for this request.
+func (e *Envelope) Timestamp() string {
+	return e.Body.Response.TimeStamp
 }
 
-// formatForNamespace mangles together several variables throughout a SOAP request.
-func formatForNamespace(common map[string]string, errorCode int, extraContents string) string {
-	return fmt.Sprintf("%s%s%s%s",
-		formatHeader(common["Action"], common["Service"]),
-		formatTemplate(common, errorCode),
-		"\t"+extraContents+"\n",
-		formatFooter(common["Action"]),
-	)
+// obtainCommon interprets a given node, and updates the envelope with common key values.
+func (e *Envelope) ObtainCommon(doc *xmlquery.Node) error {
+	var err error
+
+	// These fields are common across all requests.
+	e.Body.Response.Version, err = getKey(doc, "Version")
+	if err != nil {
+		return err
+	}
+	e.Body.Response.DeviceId, err = getKey(doc, "DeviceId")
+	if err != nil {
+		return err
+	}
+	e.Body.Response.MessageId, err = getKey(doc, "MessageId")
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
-// formatSuccess returns a standard SOAP response with a positive error code, and additional contents.
-func formatSuccess(common map[string]string, extraContents string) (bool, string) {
-	return true, formatForNamespace(common, 0, extraContents)
+// AddKVNode adds a given key by name to a specified value.
+func (e *Envelope) AddKVNode(key string, value string) {
+	e.Body.Response.KVFields = append(e.Body.Response.KVFields, KVField{
+		XMLName: xml.Name{Local: key},
+		Value:   value,
+	})
+}
+
+// AddCustomType adds a given key by name to a specified structure.
+func (e *Envelope) AddCustomType(customType interface{}) {
+	e.Body.Response.CustomFields = append(e.Body.Response.CustomFields, customType)
+}
+
+// becomeXML marshals the Envelope object, returning the intended boolean state on success.
+// ..there has to be a better way to do this, TODO.
+func (e *Envelope) becomeXML(intendedStatus bool) (bool, string) {
+	contents, err := xml.Marshal(e)
+	if err != nil {
+		return false, "an error occurred marshalling XML: " + err.Error()
+	} else {
+		// Add XML header on top of existing contents.
+		result := xml.Header + string(contents)
+		return intendedStatus, result
+	}
+}
+
+// ReturnSuccess returns a standard SOAP response with a positive error code.
+func (e *Envelope) ReturnSuccess() (bool, string) {
+	// Ensure the error code is 0.
+	e.Body.Response.ErrorCode = 0
+
+	return e.becomeXML(true)
 }
 
 // formatError returns a standard SOAP response with an error code.
-func formatError(common map[string]string, errorCode int, reason string, err error) (bool, string) {
-	extra := "<UserReason>" + reason + "</UserReason>\n" +
-		"\t<ServerReason>" + err.Error() + "</ServerReason>\n"
-	return false, formatForNamespace(common, errorCode, extra)
+func (e *Envelope) ReturnError(errorCode int, reason string, err error) (bool, string) {
+	e.Body.Response.ErrorCode = errorCode
+
+	// Ensure all additional fields are empty to avoid conflict.
+	e.Body.Response.KVFields = []KVField{}
+	e.Body.Response.CustomFields = nil
+
+	e.AddKVNode("UserReason", reason)
+	e.AddKVNode("ServerReason", err.Error())
+
+	return e.becomeXML(false)
 }
 
 // normalise parses a document, returning a document with only the request type's child nodes, stripped of prefix.
@@ -106,31 +169,6 @@ func stripNamespace(node *xmlquery.Node) {
 	for child := node.FirstChild; child != nil; child = child.NextSibling {
 		stripNamespace(child)
 	}
-}
-
-// obtainCommon interprets a given node, and from its children finds common keys and respective values across all requests.
-func obtainCommon(doc *xmlquery.Node) (map[string]string, error) {
-	info := make(map[string]string)
-
-	// Get a sexy new timestamp to use.
-	timestampNano := strconv.FormatInt(time.Now().UTC().Unix(), 10)
-	info["Timestamp"] = timestampNano + "000"
-
-	// These fields are common across all requests.
-	// Looping through all...
-	shared := []string{"Version", "DeviceId", "MessageId"}
-	for _, key := range shared {
-		// select their node by name...
-		value, err := getKey(doc, key)
-		if err != nil {
-			return nil, err
-		}
-
-		// and insert their value to our map.
-		info[key] = value
-	}
-
-	return info, nil
 }
 
 // getKey returns the value for a child key from a node, if documented.
