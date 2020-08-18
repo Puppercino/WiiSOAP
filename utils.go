@@ -96,9 +96,9 @@ func (e *Envelope) ObtainCommon(doc *xmlquery.Node) error {
 	return nil
 }
 
-// AddKVNode adds a given key by name to a specified value.
+// AddKVNode adds a given key by name to a specified value, such as <key>value</key>.
 func (e *Envelope) AddKVNode(key string, value string) {
-	e.Body.Response.KVFields = append(e.Body.Response.KVFields, KVField{
+	e.Body.Response.CustomFields = append(e.Body.Response.CustomFields, KVField{
 		XMLName: xml.Name{Local: key},
 		Value:   value,
 	})
@@ -135,7 +135,6 @@ func (e *Envelope) ReturnError(errorCode int, reason string, err error) (bool, s
 	e.Body.Response.ErrorCode = errorCode
 
 	// Ensure all additional fields are empty to avoid conflict.
-	e.Body.Response.KVFields = []KVField{}
 	e.Body.Response.CustomFields = nil
 
 	e.AddKVNode("UserReason", reason)

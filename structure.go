@@ -72,8 +72,6 @@ type Response struct {
 	ErrorCode          int
 	ServiceStandbyMode bool `xml:"ServiceStandbyMode"`
 
-	// Allows a simple <name>value</name> node to be inserted.
-	KVFields []KVField
 	// Allows for <name>[dynamic content]</name> situations.
 	CustomFields []interface{}
 }
