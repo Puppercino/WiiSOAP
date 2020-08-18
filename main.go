@@ -28,6 +28,11 @@ import (
 	"strings"
 )
 
+const (
+	// Any given challenge must be 10 characters or less (challenge.length > 0xb)
+	SharedChallenge = "NintyWhyPls"
+)
+
 // checkError makes error handling not as ugly and inefficient.
 func checkError(err error) {
 	if err != nil {

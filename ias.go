@@ -42,6 +42,11 @@ func iasHandler(e Envelope, doc *xmlquery.Node) (bool, string) {
 
 	case "GetChallenge":
 		fmt.Println("The request is valid! Responding...")
+		// The official Wii Shop Channel requests a Challenge from the server, and promptly disregards it.
+		// (Sometimes, it may not request a challenge at all.) No attempt is made to validate the response.
+		// It then uses another hard-coded value in place of this returned value entirely in any situation.
+		// For this reason, we consider it irrelevant.
+		e.AddKVNode("Challenge", SharedChallenge)
 		break
 
 	case "GetRegistrationInfo":
