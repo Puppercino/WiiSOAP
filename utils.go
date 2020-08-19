@@ -20,10 +20,10 @@ package main
 import (
 	"encoding/xml"
 	"errors"
+	"fmt"
 	"github.com/antchfx/xmlquery"
 	"io"
 	"regexp"
-	"strconv"
 	"time"
 )
 
@@ -47,7 +47,7 @@ func parseAction(original string) (string, string) {
 // NewEnvelope returns a new Envelope with proper attributes initialized.
 func NewEnvelope(service string, action string) Envelope {
 	// Get a sexy new timestamp to use.
-	timestampNano := strconv.FormatInt(time.Now().UTC().Unix(), 10) + "000"
+	timestampNano := fmt.Sprint(time.Now().UTC().UnixNano())[0:13]
 
 	return Envelope{
 		SOAPEnv: "http://schemas.xmlsoap.org/soap/envelope/",
