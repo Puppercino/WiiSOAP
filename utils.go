@@ -23,6 +23,7 @@ import (
 	"fmt"
 	"github.com/antchfx/xmlquery"
 	"io"
+	"math/rand"
 	"regexp"
 	"time"
 )
@@ -75,7 +76,12 @@ func (e *Envelope) Timestamp() string {
 	return e.Body.Response.TimeStamp
 }
 
-// obtainCommon interprets a given node, and updates the envelope with common key values.
+// DeviceId returns the Device ID for this request.
+func (e *Envelope) DeviceId() string {
+	return e.Body.Response.DeviceId
+}
+
+// ObtainCommon interprets a given node, and updates the envelope with common key values.
 func (e *Envelope) ObtainCommon(doc *xmlquery.Node) error {
 	var err error
 
@@ -130,7 +136,7 @@ func (e *Envelope) ReturnSuccess() (bool, string) {
 	return e.becomeXML(true)
 }
 
-// formatError returns a standard SOAP response with an error code.
+// ReturnError returns a standard SOAP response with an error code.
 func (e *Envelope) ReturnError(errorCode int, reason string, err error) (bool, string) {
 	e.Body.Response.ErrorCode = errorCode
 
@@ -179,4 +185,15 @@ func getKey(doc *xmlquery.Node, key string) (string, error) {
 	} else {
 		return node.InnerText(), nil
 	}
+}
+
+// Derived from https://stackoverflow.com/a/31832326, adding numbers
+const letterBytes = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
+
+func RandString(n int) string {
+	b := make([]byte, n)
+	for i := range b {
+		b[i] = letterBytes[rand.Intn(len(letterBytes))]
+	}
+	return string(b)
 }

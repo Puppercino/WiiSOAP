@@ -1,3 +1,5 @@
+github.com/RiiConnect24/wiino v0.0.0-20200719211820-910fed2fa406 h1:io4hcjlXc3gsbSLtIR7Xd7nK+Tngl3hHrPVlI7aZfR0=
+github.com/RiiConnect24/wiino v0.0.0-20200719211820-910fed2fa406/go.mod h1:BmIQ5QOpoum6rxYqqAjdpwwdfoQeKVi1xnxeEU+56ro=
 github.com/antchfx/xmlquery v1.2.4 h1:T/SH1bYdzdjTMoz2RgsfVKbM5uWh3gjDYYepFqQmFv4=
 github.com/antchfx/xmlquery v1.2.4/go.mod h1:KQQuESaxSlqugE2ZBcM/qn+ebIpt+d+4Xx7YcSGAIrM=
 github.com/antchfx/xpath v1.1.6 h1:6sVh6hB5T6phw1pFpHRQ+C4bd8sNI+O58flqtg7h0R0=

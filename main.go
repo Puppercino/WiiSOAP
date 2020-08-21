@@ -29,9 +29,12 @@ import (
 )
 
 const (
-	// Any given challenge must be 10 characters or less (challenge.length > 0xb)
+	// SharedChallenge represents a static value to this nonsensical challenge response system.
+	// The given challenge must be 11 characters or less. Contents do not matter.
 	SharedChallenge = "NintyWhyPls"
 )
+
+var db *sql.DB
 
 // checkError makes error handling not as ugly and inefficient.
 func checkError(err error) {
@@ -54,7 +57,7 @@ func main() {
 	fmt.Println("[i] Initializing core...")
 
 	// Start SQL.
-	db, err := sql.Open("mysql", fmt.Sprintf("%s:%s@tcp(%s)/%s", CON.SQLUser, CON.SQLPass, CON.SQLAddress, CON.SQLDB))
+	db, err = sql.Open("mysql", fmt.Sprintf("%s:%s@tcp(%s)/%s", CON.SQLUser, CON.SQLPass, CON.SQLAddress, CON.SQLDB))
 	checkError(err)
 
 	// Close SQL after everything else is done.
