@@ -36,16 +36,19 @@ SET time_zone = "+00:00";
 --
 
 CREATE TABLE `userbase` (
-  `DeviceId` int(10) UNSIGNED ZEROFILL NOT NULL,
-  `DeviceToken` varchar(21) NOT NULL,
-  `AccountId` int(9) UNSIGNED ZEROFILL NOT NULL,
-  `Region` varchar(2) DEFAULT NULL,
-  `Country` varchar(2) DEFAULT NULL,
-  `Language` varchar(2) DEFAULT NULL,
-  `SerialNo` varchar(11) DEFAULT NULL,
-  `DeviceCode` int(16) UNSIGNED ZEROFILL NOT NULL
+    `DeviceId` varchar(10) NOT NULL,
+    `DeviceToken` varchar(64) NOT NULL COMMENT 'This token should be considered a secret, so after generation only the sha256sum of the md5 the Wii sends is inserted.',
+    `AccountId` varchar(9) NOT NULL,
+    `Region` varchar(2) NOT NULL,
+    `Country` varchar(2) NOT NULL,
+    `Language` varchar(2) NOT NULL,
+    `SerialNo` varchar(11) NOT NULL,
+    `DeviceCode` varchar(16) NOT NULL,
+    PRIMARY KEY (`AccountId`),
+    UNIQUE KEY `AccountId` (`AccountId`),
+    UNIQUE KEY `userbase_DeviceId_uindex` (`DeviceId`),
+    UNIQUE KEY `userbase_DeviceToken_uindex` (`DeviceToken`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
-COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;

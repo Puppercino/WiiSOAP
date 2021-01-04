@@ -1,8 +1,4 @@
-package main
-
-import "encoding/xml"
-
-//	Copyright (C) 2018-2019  CornierKhan1
+//	Copyright (C) 2018-2020 CornierKhan1
 //
 //	WiiSOAP is SOAP Server Software, designed specifically to handle Wii Shop Channel SOAP.
 //
@@ -18,6 +14,10 @@ import "encoding/xml"
 //
 //    You should have received a copy of the GNU Affero General Public License
 //    along with this program.  If not, see http://www.gnu.org/licenses/.
+
+package main
+
+import "encoding/xml"
 
 /////////////////////
 // SOAP STRUCTURES //
@@ -36,71 +36,63 @@ type Config struct {
 	SQLDB      string `xml:"SQLDB"`
 }
 
-// CDS - CheckDeviceStatus
-type CDS struct {
-	XMLName   xml.Name `xml:"Envelope"`
-	Version   string   `xml:"Body>CheckDeviceStatus>Version"`
-	DeviceID  string   `xml:"Body>CheckDeviceStatus>DeviceId"`
-	MessageID string   `xml:"Body>CheckDeviceStatus>MessageId"`
+// Envelope represents the root element of any response, soapenv:Envelope.
+type Envelope struct {
+	XMLName string `xml:"soapenv:Envelope"`
+	SOAPEnv string `xml:"xmlns:soapenv,attr"`
+	XSD     string `xml:"xmlns:xsd,attr"`
+	XSI     string `xml:"xmlns:xsi,attr"`
+
+	// Represents a soapenv:Body within.
+	Body Body
+
+	// Used for internal state tracking.
+	action string
 }
 
-// NETS - NotifiedETicketsSynced
-type NETS struct {
-	XMLName   xml.Name `xml:"Envelope"`
-	Version   string   `xml:"Body>NotifiedETicketsSynced>Version"`
-	DeviceID  string   `xml:"Body>NotifiedETicketsSynced>DeviceId"`
-	MessageID string   `xml:"Body>NotifiedETicketsSynced>MessageId"`
+// Body represents the nested soapenv:Body element as a child on the root element,
+// containing the response intended for the action being handled.
+type Body struct {
+	XMLName string `xml:"soapenv:Body"`
+
+	// Represents the actual response inside
+	Response Response
 }
 
-// LET - ListETickets
-type LET struct {
-	XMLName   xml.Name `xml:"Envelope"`
-	Version   string   `xml:"Body>ListETickets>Version"`
-	DeviceID  string   `xml:"Body>ListETickets>DeviceId"`
-	MessageID string   `xml:"Body>ListETickets>MessageId"`
+// Response describes the inner response format, along with common fields across requests.
+type Response struct {
+	XMLName xml.Name
+	XMLNS   string `xml:"xmlns,attr"`
+
+	// These common fields are persistent across all requests.
+	Version            string `xml:"Version"`
+	DeviceId           string `xml:"DeviceId"`
+	MessageId          string `xml:"MessageId"`
+	TimeStamp          string `xml:"TimeStamp"`
+	ErrorCode          int
+	ServiceStandbyMode bool `xml:"ServiceStandbyMode"`
+
+	// Allows for <name>[dynamic content]</name> situations.
+	CustomFields []interface{}
 }
 
-// PT - PurchaseTitle
-type PT struct {
-	XMLName   xml.Name `xml:"Envelope"`
-	Version   string   `xml:"Body>PurchaseTitle>Version"`
-	DeviceID  string   `xml:"Body>PurchaseTitle>DeviceId"`
-	MessageID string   `xml:"Body>PurchaseTitle>MessageId"`
+// KVField represents an individual node in form of <XMLName>Contents</XMLName>.
+type KVField struct {
+	XMLName xml.Name
+	Value   string `xml:",chardata"`
 }
 
-// CR - CheckRegistration
-type CR struct {
-	XMLName   xml.Name `xml:"Envelope"`
-	Version   string   `xml:"Body>CheckRegistration>Version"`
-	DeviceID  string   `xml:"Body>CheckRegistration>DeviceId"`
-	MessageID string   `xml:"Body>CheckRegistration>MessageId"`
-	SerialNo  string   `xml:"Body>CheckRegistration>SerialNumber"`
+// Balance represents a common XML structure.
+type Balance struct {
+	XMLName  xml.Name `xml:"Balance"`
+	Amount   int      `xml:"Amount"`
+	Currency string   `xml"Currency"`
 }
 
-// GRI - GetRegistrationInfo
-type GRI struct {
-	XMLName   xml.Name `xml:"Envelope"`
-	Version   string   `xml:"Body>GetRegistrationInfo>Version"`
-	DeviceID  string   `xml:"Body>GetRegistrationInfo>DeviceId"`
-	MessageID string   `xml:"Body>GetRegistrationInfo>MessageId"`
-	AccountID string   `xml:"Body>GetRegistrationInfo>AccountId"`
-	Country   string   `xml:"Body>GetRegistrationInfo>Country"`
-}
-
-// REG - Register
-type REG struct {
-	XMLName   xml.Name `xml:"Envelope"`
-	Version   string   `xml:"Body>Register>Version"`
-	DeviceID  string   `xml:"Body>Register>DeviceId"`
-	MessageID string   `xml:"Body>Register>MessageId"`
-	AccountID string   `xml:"Body>Register>AccountId"`
-	Country   string   `xml:"Body>Register>Country"`
-}
-
-// UNR - Unregister
-type UNR struct {
-	XMLName   xml.Name `xml:"Envelope"`
-	Version   string   `xml:"Body>Unregister>Version"`
-	DeviceID  string   `xml:"Body>Unregister>DeviceId"`
-	MessageID string   `xml:"Body>Unregister>MessageId"`
+// Transactions represents a common XML structure.
+type Transactions struct {
+	XMLName       xml.Name `xml:"Transactions"`
+	TransactionId string   `xml:"TransactionId"`
+	Date          string   `xml:"Date"`
+	Type          string   `xml:"Type"`
 }
